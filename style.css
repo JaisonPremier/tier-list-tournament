@@ -8,6 +8,7 @@
   --line: rgba(255, 249, 240, 0.14);
   --line-strong: rgba(255, 249, 240, 0.28);
   --accent: #ffab2e;
+  --brand: #ffcf5c; /* fixed color for chrome text (round counter, tags, labels) — never tied to a character's or player's accent */
 
   --font-impact: "Anton", "Arial Black", sans-serif;
   --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
@@ -41,13 +42,13 @@ body::before {
   z-index: -3;
   background: repeating-conic-gradient(
     from 0deg,
-    var(--accent) 0deg 8deg,
-    transparent 8deg 20deg
+    var(--accent) 0deg 13deg,
+    transparent 13deg 30deg
   );
-  opacity: 0.22;
+  opacity: 0.3;
   animation: spinSlow 50s linear infinite;
-  mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 62%);
-  -webkit-mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 62%);
+  mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 85%);
+  -webkit-mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 85%);
 }
 body::after {
   content: "";
@@ -155,7 +156,7 @@ body::after {
   font-size: 1rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--brand);
   margin: 0 0 26px;
 }
 
@@ -384,7 +385,7 @@ body::after {
   font-size: 2.8rem;
   letter-spacing: 1px;
   color: var(--paper);
-  text-shadow: 2px 2px 0 var(--accent);
+  text-shadow: 2px 2px 0 var(--brand);
 }
 .round-banner-total {
   font-family: var(--font-display);
@@ -398,7 +399,7 @@ body::after {
   font-family: var(--font-display);
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--brand);
   margin: 0 0 20px;
   font-size: 1rem;
 }
@@ -654,7 +655,7 @@ body::after {
   font-size: 0.85rem;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--brand);
 }
 .acquire-name {
   font-family: var(--font-impact);

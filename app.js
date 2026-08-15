@@ -75,9 +75,12 @@ function characterAccent(character) {
   return CHARACTER_ACCENTS[idx];
 }
 
-// The sunburst/halftone backdrop lives on <body> (position: fixed, full
-// viewport) rather than inside any one panel, so it's never cropped by a
-// container — this just retints it for the current screen's context.
+// The sunburst backdrop lives on <body> (position: fixed, full viewport)
+// rather than inside any one panel, so it's never cropped by a container.
+// It only ever changes color for an actual drawn character (during the
+// draft) — every other screen pins it to this same fixed default so the
+// background doesn't shift around for no reason.
+const DEFAULT_ACCENT = "#ffab2e";
 function setBodyAccent(hex) {
   document.body.style.setProperty("--accent", hex);
 }
@@ -197,7 +200,7 @@ function render() {
  * ------------------------------------------------------------------- */
 
 function renderFranchiseScreen() {
-  setBodyAccent("#ffab2e");
+  setBodyAccent(DEFAULT_ACCENT);
   const cards = state.db.franchises
     .map(
       (fr) => `
@@ -224,7 +227,7 @@ function renderFranchiseScreen() {
  * ------------------------------------------------------------------- */
 
 function renderPlayerCountScreen() {
-  setBodyAccent(state.franchise === "naruto" ? "#ff7a3d" : "#3aa8ff");
+  setBodyAccent(DEFAULT_ACCENT);
   const options = [2, 3, 4]
     .map(
       (n) => `
@@ -256,7 +259,7 @@ function renderAvatarScreen() {
     ? state.avatarHighlight
     : AVATARS.find((a) => !taken.has(a.id)).id;
   const featured = AVATARS.find((a) => a.id === highlighted);
-  setBodyAccent(featured.accent);
+  setBodyAccent(DEFAULT_ACCENT);
 
   const thumbs = AVATARS.map((a) => {
     const isTaken = taken.has(a.id);
@@ -728,7 +731,7 @@ function advanceRound() {
  * ------------------------------------------------------------------- */
 
 function renderVsScreen() {
-  setBodyAccent(avatarMeta(state.results.teams[0].avatarId).accent);
+  setBodyAccent(DEFAULT_ACCENT);
   const revealed = state.results.revealed;
   const cards = state.results.teams
     .map((t, i) => {
@@ -765,7 +768,7 @@ function renderVsScreen() {
 
 function renderResultsScreen() {
   const ranked = [...state.results.teams].sort((a, b) => b.finalScore - a.finalScore);
-  setBodyAccent(avatarMeta(ranked[0].avatarId).accent);
+  setBodyAccent(DEFAULT_ACCENT);
 
   const rankingHtml = ranked
     .map((t, i) => {
