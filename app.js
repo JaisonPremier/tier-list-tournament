@@ -15,10 +15,10 @@ const DRAW_ANIMATION_MS = 800;
 // carries one accent color (eyeballed from the artwork) used sparingly as a
 // decorative highlight — never as the primary way to tell players apart.
 const AVATARS = [
-  { id: "avatar-01", image: "avatars/avatar-01.png", accent: "#ffab2e" },
-  { id: "avatar-02", image: "avatars/avatar-02.png", accent: "#3aa8ff" },
-  { id: "avatar-03", image: "avatars/avatar-03.png", accent: "#b06bff" },
-  { id: "avatar-04", image: "avatars/avatar-04.png", accent: "#33e0a0" },
+  { id: "avatar-01", image: "avatars/avatar-01.jpg", accent: "#ffab2e" },
+  { id: "avatar-02", image: "avatars/avatar-02.jpg", accent: "#3aa8ff" },
+  { id: "avatar-03", image: "avatars/avatar-03.jpg", accent: "#b06bff" },
+  { id: "avatar-04", image: "avatars/avatar-04.jpg", accent: "#33e0a0" },
 ];
 
 const MEDALS = ["\u{1F947}", "\u{1F948}", "\u{1F949}", "4\u{FE0F}\u{20E3}"];
