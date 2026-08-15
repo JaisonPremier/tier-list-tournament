@@ -4,7 +4,15 @@
  * Constants
  * ------------------------------------------------------------------- */
 
-const TEAM_SIZE = 3;
+// Each auction round draws and sells exactly ONE character to exactly ONE
+// player, so the number of rounds is NOT the per-player team size — it's
+// the total number of characters that will be sold across the whole game.
+// To keep teams comparably sized (matching the "3 characters per team"
+// examples), total rounds scale with player count: playerCount x TEAM_SIZE.
+const TEAM_SIZE = 3; // target characters per player, on average
+const STARTING_BUDGET = 20; // CHF
+const QUICK_BID_AMOUNTS = [1, 2, 3, 5, 10];
+const DRAW_ANIMATION_MS = 800;
 
 const COLORS = [
   { id: "red", label: "Red", emoji: "\u{1F534}", hex: "#ef4444" },
@@ -66,9 +74,18 @@ const state = {
   playerCount: null,
   colorAssign: [], // index = playerNumber-1, value = color id
   colorStep: 0,
-  draftPicks: [], // array of arrays of character objects, index = playerNumber-1
-  draftOrder: [], // sequence of player numbers (1-based) for the snake draft
-  draftStep: 0,
+  draftPicks: [], // array of arrays of {..character, paid}, index = playerNumber-1
+  budgets: [], // index = playerNumber-1, CHF remaining
+  round: 0, // 1-indexed, up to totalRounds
+  totalRounds: 0, // playerCount x TEAM_SIZE, total characters sold this game
+  draftedIds: new Set(), // character ids already auctioned off this game
+  currentCharacter: null, // character object drawn for the active round
+  phase: null, // "drawing" | "bidding" | "reveal" | "winner"
+  activeBidders: [], // player numbers participating in the current auction (full field, or tied subset during a tiebreak)
+  pendingBidders: [], // subset of activeBidders still to submit a bid
+  bids: {}, // playerNum -> CHF amount, for the current auction
+  isTiebreak: false,
+  roundWinner: null, // { playerNum, amount } once resolved
   matchSeed: null,
   results: null, // computed on entering results
   modalTeam: null, // player number whose "how calculated" modal is open
@@ -80,8 +97,17 @@ function resetGame() {
   state.colorAssign = [];
   state.colorStep = 0;
   state.draftPicks = [];
-  state.draftOrder = [];
-  state.draftStep = 0;
+  state.budgets = [];
+  state.round = 0;
+  state.totalRounds = 0;
+  state.draftedIds = new Set();
+  state.currentCharacter = null;
+  state.phase = null;
+  state.activeBidders = [];
+  state.pendingBidders = [];
+  state.bids = {};
+  state.isTiebreak = false;
+  state.roundWinner = null;
   state.matchSeed = null;
   state.results = null;
   state.modalTeam = null;
@@ -221,67 +247,256 @@ function renderColorScreen() {
 }
 
 /* ---------------------------------------------------------------------
- * Screen: draft
+ * Screen: draft (random-draw blind auction)
+ *
+ * THE GAME CHOOSES THE CHARACTER. THE PLAYERS CHOOSE THE BID.
+ * Players never pick from a roster — each round the game draws one random
+ * character from those not yet auctioned, then every player secretly locks
+ * in a CHF bid. Highest bid wins the character and pays their bid amount.
  * ------------------------------------------------------------------- */
 
 function renderDraftScreen() {
-  const totalPicks = state.playerCount * TEAM_SIZE;
-  if (state.draftStep >= totalPicks) {
-    // draft complete, move on
-    state.screen = "vs";
-    state.matchSeed = Math.floor(seededUnit(draftSeedKey()) * 1e9);
-    computeResults();
-    return renderVsScreen();
+  switch (state.phase) {
+    case "drawing":
+      return renderDrawingPhase();
+    case "bidding":
+      return renderBiddingPhase();
+    case "reveal":
+      return renderRevealPhase();
+    case "winner":
+      return renderWinnerPhase();
+    default:
+      return `<div class="screen center"><p>...</p></div>`;
   }
+}
 
-  const currentPlayer = state.draftOrder[state.draftStep];
-  const meta = colorMeta(state.colorAssign[currentPlayer - 1]);
-  const pickedIds = new Set(
-    state.draftPicks.flat().map((c) => c.id)
-  );
-
-  const franchiseData = state.db.franchises.find((f) => f.id === state.franchise);
-  const roster = franchiseData.characters
-    .map((c) => {
-      const picked = pickedIds.has(c.id);
-      return `
-      <div class="char-card ${picked ? "picked" : ""}" ${picked ? "" : `data-action="pickChar" data-value="${c.id}"`}>
-        <div class="char-name">${escapeHtml(c.displayName)}</div>
-        <div class="char-tier">${escapeHtml(c.tierLabel)}</div>
-        <div class="char-power">PWR ${c.stats.power}</div>
-      </div>`;
-    })
-    .join("");
-
-  const teamsPanel = Array.from({ length: state.playerCount }, (_, i) => {
+function renderTeamsSidebar(highlightPlayer) {
+  return Array.from({ length: state.playerCount }, (_, i) => {
     const num = i + 1;
     const m = colorMeta(state.colorAssign[i]);
     const picks = state.draftPicks[i] || [];
-    const isCurrent = num === currentPlayer;
-    const rows = Array.from({ length: TEAM_SIZE }, (_, slot) => {
+    const isCurrent = num === highlightPlayer;
+    // Auctions can leave a player with more (or fewer) than the target
+    // TEAM_SIZE, since roster size is driven by who wins each round, not
+    // a fixed per-player slot count — so render at least `picks.length` rows.
+    const rows = Array.from({ length: Math.max(TEAM_SIZE, picks.length) }, (_, slot) => {
       const c = picks[slot];
-      return `<li class="${c ? "filled" : ""}">${c ? escapeHtml(c.displayName) : "— empty —"}</li>`;
+      return `<li class="${c ? "filled" : ""}">${c ? `${escapeHtml(c.displayName)} &mdash; ${c.paid} CHF` : "— empty —"}</li>`;
     }).join("");
     return `
       <div class="team-box ${isCurrent ? "current" : ""}">
-        <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()}</h4>
+        <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()} &middot; ${state.budgets[i]} CHF</h4>
         <ul>${rows}</ul>
       </div>`;
+  }).join("");
+}
+
+function renderDrawingPhase() {
+  return `
+    <div class="screen">
+      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      <div class="draw-card drawing">
+        <div class="draw-card-mark">?</div>
+        <div class="draw-card-label">DRAWING CHARACTER<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+      </div>
+      <div class="draft-layout">
+        <div></div>
+        <div class="teams-panel">${renderTeamsSidebar(null)}</div>
+      </div>
+    </div>`;
+}
+
+function renderBiddingPhase() {
+  const c = state.currentCharacter;
+  const currentBidder = state.pendingBidders[0];
+  const meta = colorMeta(state.colorAssign[currentBidder - 1]);
+  const remaining = state.budgets[currentBidder - 1];
+
+  const tieBanner = state.isTiebreak
+    ? `<div class="tiebreak-banner">TIEBREAKER &mdash; ${state.activeBidders.map((p) => colorMeta(state.colorAssign[p - 1]).label.toUpperCase()).join(" vs ")} must re-bid</div>`
+    : "";
+
+  const track = state.activeBidders
+    .map((p) => {
+      const m = colorMeta(state.colorAssign[p - 1]);
+      const locked = Object.prototype.hasOwnProperty.call(state.bids, p);
+      const cls = locked ? "done" : p === currentBidder ? "active" : "";
+      return `<div class="player-pill ${cls}">${m.emoji} P${p}: ${locked ? "LOCKED ✓" : "BIDDING..."}</div>`;
+    })
+    .join("");
+
+  const quickButtons = QUICK_BID_AMOUNTS.map((amt) => {
+    const disabled = amt > remaining;
+    return `<button class="btn bid-btn" ${disabled ? "disabled" : `data-action="lockBid" data-value="${amt}"`}>${amt}</button>`;
   }).join("");
 
   return `
     <div class="screen">
-      <div class="player-banner">
-        <span class="player-chip" style="border-color:${meta.hex}">
-          <span class="dot" style="background:${meta.hex}"></span>
-          PLAYER ${currentPlayer} &mdash; ${meta.label.toUpperCase()}, PICK A CHARACTER (${state.draftStep + 1}/${totalPicks})
-        </span>
+      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      ${tieBanner}
+      <div class="draw-card">
+        <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
+        <div class="draw-card-tier">${escapeHtml(c.tierLabel)}</div>
+        <div class="draw-card-power">PWR ${c.stats.power}</div>
       </div>
-      <div class="draft-layout">
-        <div class="roster">${roster}</div>
-        <div class="teams-panel">${teamsPanel}</div>
+
+      <div class="player-track">${track}</div>
+
+      <div class="bidder-panel">
+        <div class="player-chip" style="border-color:${meta.hex}">
+          <span class="dot" style="background:${meta.hex}"></span>
+          PLAYER ${currentBidder} &mdash; ${meta.label.toUpperCase()}, PLACE YOUR BID &middot; ${remaining} CHF remaining
+        </div>
+        <div class="bid-quick-row">
+          ${quickButtons}
+          <button class="btn bid-btn all-in" data-action="lockBid" data-value="${remaining}">ALL IN</button>
+        </div>
+        <div class="bid-custom-row">
+          <input type="number" id="customBidInput" min="0" max="${remaining}" step="1" placeholder="Custom amount" />
+          <button class="btn secondary" data-action="lockCustomBid">Lock Bid</button>
+        </div>
+      </div>
+
+      <div class="draft-layout mt-24">
+        <div></div>
+        <div class="teams-panel">${renderTeamsSidebar(currentBidder)}</div>
       </div>
     </div>`;
+}
+
+function renderRevealPhase() {
+  const c = state.currentCharacter;
+  const rows = state.activeBidders
+    .map((p) => {
+      const m = colorMeta(state.colorAssign[p - 1]);
+      return `
+      <div class="vs-card" style="border-color:${m.hex}">
+        <div class="name">${m.emoji} PLAYER ${p}</div>
+        <div class="score" style="color:${m.hex}">${state.bids[p]} CHF</div>
+      </div>`;
+    })
+    .join("");
+
+  return `
+    <div class="screen">
+      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      <div class="draw-card">
+        <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
+        <div class="draw-card-tier">${escapeHtml(c.tierLabel)}</div>
+        <div class="draw-card-power">PWR ${c.stats.power}</div>
+      </div>
+      <div class="vs-row">${rows}</div>
+      <div class="btn-row"><button class="btn" data-action="continueReveal">Reveal Bids</button></div>
+    </div>`;
+}
+
+function renderWinnerPhase() {
+  const c = state.currentCharacter;
+  const { playerNum, amount } = state.roundWinner;
+  const m = colorMeta(state.colorAssign[playerNum - 1]);
+  const isLastRound = state.round >= state.totalRounds;
+
+  return `
+    <div class="screen">
+      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      <div class="winner-banner" style="color:${m.hex}">${m.emoji} ${m.label.toUpperCase()} WINS!</div>
+      <div class="center" style="margin-bottom:20px;">
+        <strong>${escapeHtml(c.displayName)}</strong> joined ${m.label.toUpperCase()} for ${amount} CHF
+      </div>
+      <div class="draft-layout">
+        <div></div>
+        <div class="teams-panel">${renderTeamsSidebar(playerNum)}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" data-action="nextCharacter">${isLastRound ? "See Final Battle" : "Next Character →"}</button>
+      </div>
+    </div>`;
+}
+
+/* ---------------------------------------------------------------------
+ * Draft / auction logic
+ * ------------------------------------------------------------------- */
+
+function startRound() {
+  const franchiseData = state.db.franchises.find((f) => f.id === state.franchise);
+  const pool = franchiseData.characters.filter((c) => !state.draftedIds.has(c.id));
+  const randomIndex = Math.floor(Math.random() * pool.length);
+  state.currentCharacter = pool[randomIndex];
+
+  state.phase = "drawing";
+  state.isTiebreak = false;
+  state.activeBidders = Array.from({ length: state.playerCount }, (_, i) => i + 1);
+  state.pendingBidders = [...state.activeBidders];
+  state.bids = {};
+  state.roundWinner = null;
+  render();
+
+  setTimeout(() => {
+    if (state.phase === "drawing") {
+      state.phase = "bidding";
+      render();
+    }
+  }, DRAW_ANIMATION_MS);
+}
+
+function lockBid(playerNum, rawAmount) {
+  const remaining = state.budgets[playerNum - 1];
+  const amount = clamp(Math.round(rawAmount) || 0, 0, remaining);
+  state.bids[playerNum] = amount;
+  state.pendingBidders = state.pendingBidders.filter((p) => p !== playerNum);
+  if (state.pendingBidders.length === 0) {
+    state.phase = "reveal";
+  }
+  render();
+}
+
+function resolveWinner() {
+  const amounts = state.activeBidders.map((p) => ({ p, amt: state.bids[p] }));
+  const max = Math.max(...amounts.map((a) => a.amt));
+  const winners = amounts.filter((a) => a.amt === max).map((a) => a.p);
+
+  if (winners.length === 1) {
+    finalizeWinner(winners[0], max);
+    return;
+  }
+
+  // Tie: if none of the tied players could possibly raise their bid
+  // (already at their full remaining budget), further tiebreak rounds
+  // can't resolve it — pick randomly among them instead of looping forever.
+  const canAnyoneRaise = winners.some((p) => state.budgets[p - 1] > max);
+  if (!canAnyoneRaise) {
+    const randomWinner = winners[Math.floor(Math.random() * winners.length)];
+    finalizeWinner(randomWinner, max);
+    return;
+  }
+
+  state.isTiebreak = true;
+  state.activeBidders = winners;
+  state.pendingBidders = [...winners];
+  state.bids = {};
+  state.phase = "bidding";
+  render();
+}
+
+function finalizeWinner(playerNum, amount) {
+  state.budgets[playerNum - 1] -= amount;
+  state.draftPicks[playerNum - 1].push({ ...state.currentCharacter, paid: amount });
+  state.draftedIds.add(state.currentCharacter.id);
+  state.roundWinner = { playerNum, amount };
+  state.phase = "winner";
+  render();
+}
+
+function advanceRound() {
+  state.round++;
+  if (state.round > state.totalRounds) {
+    state.screen = "vs";
+    state.matchSeed = Math.floor(seededUnit(draftSeedKey()) * 1e9);
+    computeResults();
+    render();
+  } else {
+    startRound();
+  }
 }
 
 /* ---------------------------------------------------------------------
@@ -346,7 +561,7 @@ function renderResultsScreen() {
     .map((t) => {
       const m = colorMeta(t.color);
       const memberRows = t.members
-        .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)}</span><span>${c.stats.power}</span></div>`)
+        .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)} <span style="color:var(--text-dim);">(${c.paid} CHF)</span></span><span>${c.stats.power}</span></div>`)
         .join("");
       return `
         <div class="team-detail-card" style="border-color:${m.hex}">
@@ -433,24 +648,33 @@ function computeResults() {
     const playerNum = idx + 1;
     const color = state.colorAssign[idx];
 
+    // A team can end an auction with zero characters (every round can be won
+    // by someone else) — guard the averages instead of dividing by zero.
+    const hasMembers = members.length > 0;
+
     // Every intermediate value is rounded to 1 decimal before it feeds the
     // next step, so the numbers shown in the breakdown modal always sum
     // exactly to the displayed Final Score (no silent full-precision drift).
     const avg = {};
     for (const key of Object.keys(STAT_LABELS)) {
-      avg[key] = round1(members.reduce((s, c) => s + c.stats[key], 0) / members.length);
+      avg[key] = hasMembers
+        ? round1(members.reduce((s, c) => s + c.stats[key], 0) / members.length)
+        : 0;
     }
 
     const coreScore = round1(
       Object.keys(STAT_WEIGHTS).reduce((s, key) => s + avg[key] * STAT_WEIGHTS[key], 0)
     );
 
-    const powerVals = members.map((c) => c.stats.power);
-    const meanPower = powerVals.reduce((s, v) => s + v, 0) / powerVals.length;
-    const variance =
-      powerVals.reduce((s, v) => s + (v - meanPower) ** 2, 0) / powerVals.length;
-    const stddev = Math.sqrt(variance);
-    const teamwork = round1(clamp(100 - stddev * 2, 0, 100));
+    let teamwork = 0;
+    if (hasMembers) {
+      const powerVals = members.map((c) => c.stats.power);
+      const meanPower = powerVals.reduce((s, v) => s + v, 0) / powerVals.length;
+      const variance =
+        powerVals.reduce((s, v) => s + (v - meanPower) ** 2, 0) / powerVals.length;
+      const stddev = Math.sqrt(variance);
+      teamwork = round1(clamp(100 - stddev * 2, 0, 100));
+    }
 
     const weightedBase = round1(coreScore * 0.85 + teamwork * 0.15);
     const synergy = round1((coreScore - 70) * 0.08);
@@ -499,16 +723,6 @@ function escapeHtml(str) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-}
-
-function buildSnakeDraftOrder(playerCount, rounds) {
-  const order = [];
-  for (let r = 0; r < rounds; r++) {
-    const seq = Array.from({ length: playerCount }, (_, i) => i + 1);
-    if (r % 2 === 1) seq.reverse();
-    order.push(...seq);
-  }
-  return order;
 }
 
 function animateReveal() {
@@ -575,22 +789,39 @@ function bindEvents() {
         state.colorAssign[state.colorStep] = value;
         state.colorStep++;
         if (state.colorStep >= state.playerCount) {
-          state.draftOrder = buildSnakeDraftOrder(state.playerCount, TEAM_SIZE);
-          state.draftStep = 0;
+          state.budgets = Array.from({ length: state.playerCount }, () => STARTING_BUDGET);
+          state.draftedIds = new Set();
+          state.totalRounds = state.playerCount * TEAM_SIZE;
+          state.round = 1;
           state.screen = "draft";
+          startRound();
+          return;
         }
         render();
         break;
 
-      case "pickChar": {
-        const currentPlayer = state.draftOrder[state.draftStep];
-        const franchiseData = state.db.franchises.find((f) => f.id === state.franchise);
-        const character = franchiseData.characters.find((c) => c.id === value);
-        state.draftPicks[currentPlayer - 1].push(character);
-        state.draftStep++;
-        render();
+      case "lockBid": {
+        const currentBidder = state.pendingBidders[0];
+        lockBid(currentBidder, parseInt(value, 10));
         break;
       }
+
+      case "lockCustomBid": {
+        const currentBidder = state.pendingBidders[0];
+        const input = document.getElementById("customBidInput");
+        const amount = input ? parseInt(input.value, 10) : NaN;
+        if (Number.isNaN(amount)) break;
+        lockBid(currentBidder, amount);
+        break;
+      }
+
+      case "continueReveal":
+        resolveWinner();
+        break;
+
+      case "nextCharacter":
+        advanceRound();
+        break;
 
       case "calculate":
         animateReveal();

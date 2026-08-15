@@ -402,6 +402,92 @@ html, body {
 .center { text-align: center; }
 .mt-24 { margin-top: 24px; }
 
+.draw-card {
+  max-width: 360px;
+  margin: 0 auto 24px;
+  background: var(--bg-panel);
+  border: 3px solid var(--accent);
+  border-radius: 18px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.draw-card.drawing { border-color: var(--border); }
+.draw-card-mark {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+.draw-card-label {
+  color: var(--text-dim);
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+.dots span {
+  animation: blink 1.2s infinite;
+  opacity: 0;
+}
+.dots span:nth-child(1) { animation-delay: 0s; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 20% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+.draw-card-name { font-size: 1.5rem; font-weight: 900; margin-bottom: 6px; }
+.draw-card-tier { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 10px; }
+.draw-card-power { color: var(--accent); font-weight: 800; font-size: 1.1rem; }
+
+.tiebreak-banner {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.bidder-panel {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+.bid-quick-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+}
+.bid-btn {
+  min-width: 56px;
+  padding: 12px 14px;
+}
+.bid-btn.all-in {
+  background: linear-gradient(90deg, #ff6b6b, var(--accent));
+}
+.bid-custom-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.bid-custom-row input {
+  background: var(--bg-panel);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--text);
+  width: 160px;
+  font-size: 0.95rem;
+}
+.bid-custom-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
 .franchise-note {
   text-align: center;
   color: var(--text-dim);
