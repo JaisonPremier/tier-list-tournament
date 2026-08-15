@@ -9,7 +9,6 @@
 // alternating (English-style) auctions until every player has TEAM_SIZE.
 const TEAM_SIZE = 3;
 const STARTING_BUDGET = 20; // yen (¥)
-const QUICK_RAISE_STEPS = [1, 2, 3, 5, 10]; // offsets above the current minimum bid
 const DRAW_ANIMATION_MS = 800;
 
 const COLORS = [
@@ -379,20 +378,25 @@ function renderDrawingPhase() {
     </div>`;
 }
 
-function quickBidAmounts(minBid, budget) {
-  return QUICK_RAISE_STEPS.map((step) => minBid - 1 + step).filter(
-    (amt, idx, arr) => amt <= budget && arr.indexOf(amt) === idx
-  );
+// Every amount from 1 up to the starting budget gets its own button, always
+// visible — amounts outside [minBid, budget] are just shown disabled/faded
+// rather than hidden, so a player can see the whole range they're locked out of.
+function renderBidAmountGrid(minBid, budget) {
+  const buttons = [];
+  for (let amt = 1; amt <= STARTING_BUDGET; amt++) {
+    const available = amt >= minBid && amt <= budget;
+    buttons.push(
+      available
+        ? `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`
+        : `<button class="btn bid-btn" disabled>&yen;${amt}</button>`
+    );
+  }
+  return buttons.join("");
 }
 
 function renderOpeningPhase() {
   const opener = state.auctionOrder[0];
   const remaining = state.budgets[opener - 1];
-  const amounts = quickBidAmounts(1, remaining);
-
-  const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`)
-    .join("");
 
   return `
     <div class="screen">
@@ -403,8 +407,7 @@ function renderOpeningPhase() {
         ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; &yen;${remaining}`)}
         <p class="calc-note center">Must bid at least &yen;1 to open the auction. Pick an amount, then confirm.</p>
         <div class="bid-quick-row">
-          ${quickButtons}
-          <button class="btn bid-btn all-in" data-action="fillBidAmount" data-value="${remaining}">ALL IN</button>
+          ${renderBidAmountGrid(1, remaining)}
         </div>
         <div class="bid-custom-row">
           <input type="number" id="customBidInput" min="1" max="${remaining}" step="1" placeholder="Amount" />
@@ -425,11 +428,6 @@ function renderBiddingPhase() {
   const remaining = state.budgets[turnPlayer - 1];
   const minRaise = state.currentBid + 1;
   const canRaise = remaining >= minRaise;
-  const amounts = canRaise ? quickBidAmounts(minRaise, remaining) : [];
-
-  const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`)
-    .join("");
 
   // TAKE (instant-win at the standing price) doesn't exist — a player either
   // raises the bid or withdraws and lets it go to whoever's still in. Picking
@@ -437,8 +435,7 @@ function renderBiddingPhase() {
   const raiseControls = canRaise
     ? `
       <div class="bid-quick-row">
-        ${quickButtons}
-        <button class="btn bid-btn all-in" data-action="fillBidAmount" data-value="${remaining}">ALL IN</button>
+        ${renderBidAmountGrid(minRaise, remaining)}
       </div>
       <div class="bid-custom-row">
         <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Amount" />
@@ -459,7 +456,7 @@ function renderBiddingPhase() {
       <div class="bidder-panel">
         ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; &yen;${remaining}`)}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn secondary" data-action="withdrawBid">WITHDRAW &mdash; let them have it</button>
+          <button class="btn secondary" data-action="withdrawBid">WITHDRAW &mdash; let them have it for &yen;${state.currentBid}</button>
         </div>
         ${raiseControls}
       </div>
