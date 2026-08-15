@@ -8,7 +8,6 @@
   --line: rgba(255, 249, 240, 0.14);
   --line-strong: rgba(255, 249, 240, 0.28);
   --accent: #ffab2e;
-  --accent-2: #ff5e7e;
 
   --font-impact: "Anton", "Arial Black", sans-serif;
   --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
@@ -27,17 +26,43 @@ html, body {
 }
 
 body {
+  position: relative;
   background-color: var(--ink);
+  transition: background-color 0.4s ease;
+}
+
+/* Full-viewport sunburst + halftone backdrop, keyed to --accent (set by JS
+   per-screen via setBodyAccent()). Fixed positioning means it's never
+   cropped by a container — it's behind the whole page, not one panel. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -3;
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--accent) 0deg 8deg,
+    transparent 8deg 20deg
+  );
+  opacity: 0.22;
+  animation: spinSlow 50s linear infinite;
+  mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 62%);
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
   background-image:
-    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.3px),
-    radial-gradient(ellipse 55% 40% at 10% 0%, rgba(255, 94, 126, 0.20), transparent 60%),
-    radial-gradient(ellipse 55% 40% at 90% 0%, rgba(58, 168, 255, 0.20), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(176, 107, 255, 0.16), transparent 60%);
-  background-size: 15px 15px, auto, auto, auto;
-  background-attachment: fixed;
+    radial-gradient(ellipse 55% 40% at 10% 0%, rgba(255, 94, 126, 0.16), transparent 60%),
+    radial-gradient(ellipse 55% 40% at 90% 0%, rgba(58, 168, 255, 0.16), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(176, 107, 255, 0.12), transparent 60%);
 }
 
 #app {
+  position: relative;
+  z-index: 0;
   max-width: 1040px;
   margin: 0 auto;
   padding: 40px 20px 80px;
@@ -82,44 +107,10 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ---------------------------------------------------------------------
- * Burst backdrop — the same sunburst + halftone language as the avatar
- * artwork itself, driven by --accent. Applied directly to every hero
- * moment (avatar stage, character reveal, acquisition) via ::before/::after
- * so it lives underneath that element's own content with no extra markup.
- * ------------------------------------------------------------------- */
-
-.avatar-stage, .reveal-stage, .acquire-stage {
-  position: relative;
-  isolation: isolate;
-}
-.avatar-stage::before, .reveal-stage::before, .acquire-stage::before {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  z-index: -2;
-  background: repeating-conic-gradient(
-    from 0deg,
-    var(--accent) 0deg 8deg,
-    transparent 8deg 20deg
-  );
-  opacity: 0.2;
-  animation: spinSlow 40s linear infinite;
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 65%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 65%);
-}
-.avatar-stage::after, .reveal-stage::after, .acquire-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.7) 1.4px, transparent 1.6px);
-  background-size: 12px 12px;
-  opacity: 0.12;
-  mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 70%);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 70%);
-}
-.reveal-stage.drawing::before, .reveal-stage.drawing::after { opacity: 0.05; animation: none; }
+/* The sunburst/halftone backdrop now lives on body::before/::after (fixed,
+ * full-viewport, keyed to --accent) so it's never cropped by a container —
+ * see the `body` rules above. Hero panels below are just transparent
+ * windows onto it. */
 
 /* ---------------------------------------------------------------------
  * Type — manga poster impact
@@ -130,10 +121,10 @@ body {
   font-family: var(--font-impact);
   font-size: clamp(2.6rem, 8vw, 4.6rem);
   letter-spacing: 1px;
-  margin: 6px 0 2px;
+  margin: 6px 0 18px;
   line-height: 1;
   color: var(--paper);
-  text-shadow: 3px 3px 0 var(--accent), 6px 6px 0 var(--accent-2), 10px 10px 18px rgba(0, 0, 0, 0.5);
+  text-shadow: 3px 3px 0 var(--accent), 6px 6px 0 color-mix(in srgb, var(--accent) 55%, black), 10px 10px 18px rgba(0, 0, 0, 0.5);
 }
 .title.serif-em {
   font-size: clamp(2.8rem, 9vw, 5rem);
@@ -177,7 +168,7 @@ body {
   font-weight: 400;
   letter-spacing: 1.5px;
   font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, black));
   color: #1a0d00;
   border: none;
   clip-path: polygon(6% 0, 100% 0, 94% 100%, 0% 100%);
@@ -190,12 +181,12 @@ body {
 .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; filter: none; }
 
 .btn.ghost {
-  background: transparent;
-  color: var(--text);
-  border: 2px solid var(--line-strong);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--paper);
+  border: 2px solid var(--accent);
   clip-path: none;
 }
-.btn.ghost:hover { border-color: var(--accent); color: var(--accent); filter: none; }
+.btn.ghost:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); filter: none; }
 
 .btn-row {
   display: flex;
@@ -263,7 +254,7 @@ body {
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
-  margin: 0 auto 8px;
+  margin: 28px auto 8px;
 }
 .lobby-choice {
   width: 112px;
@@ -438,7 +429,7 @@ body {
   letter-spacing: 1px;
   line-height: 0.95;
   color: var(--paper);
-  text-shadow: 3px 3px 0 var(--accent), 7px 7px 0 var(--accent-2);
+  text-shadow: 3px 3px 0 var(--accent), 7px 7px 0 color-mix(in srgb, var(--accent) 55%, black);
   animation: popIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-mark {
@@ -558,7 +549,7 @@ body {
 .chip-btn.selected {
   border-color: var(--accent);
   color: #1a0d00;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, black));
 }
 
 .bid-custom-row {

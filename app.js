@@ -75,6 +75,13 @@ function characterAccent(character) {
   return CHARACTER_ACCENTS[idx];
 }
 
+// The sunburst/halftone backdrop lives on <body> (position: fixed, full
+// viewport) rather than inside any one panel, so it's never cropped by a
+// container — this just retints it for the current screen's context.
+function setBodyAccent(hex) {
+  document.body.style.setProperty("--accent", hex);
+}
+
 /* ---------------------------------------------------------------------
  * Game state
  * ------------------------------------------------------------------- */
@@ -190,6 +197,7 @@ function render() {
  * ------------------------------------------------------------------- */
 
 function renderFranchiseScreen() {
+  setBodyAccent("#ffab2e");
   const cards = state.db.franchises
     .map(
       (fr) => `
@@ -216,6 +224,7 @@ function renderFranchiseScreen() {
  * ------------------------------------------------------------------- */
 
 function renderPlayerCountScreen() {
+  setBodyAccent(state.franchise === "naruto" ? "#ff7a3d" : "#3aa8ff");
   const options = [2, 3, 4]
     .map(
       (n) => `
@@ -247,6 +256,7 @@ function renderAvatarScreen() {
     ? state.avatarHighlight
     : AVATARS.find((a) => !taken.has(a.id)).id;
   const featured = AVATARS.find((a) => a.id === highlighted);
+  setBodyAccent(featured.accent);
 
   const thumbs = AVATARS.map((a) => {
     const isTaken = taken.has(a.id);
@@ -295,6 +305,9 @@ function renderAvatarScreen() {
  * ------------------------------------------------------------------- */
 
 function renderDraftScreen() {
+  if (state.currentCharacter) {
+    setBodyAccent(characterAccent(state.currentCharacter));
+  }
   let phaseHtml;
   switch (state.phase) {
     case "drawing":
@@ -435,6 +448,7 @@ function renderBidAmountGrid(minBid, budget) {
 
 function renderOpeningPhase() {
   const opener = state.auctionOrder[0];
+  const openerAv = avatarMeta(state.avatarAssign[opener - 1]);
   const remaining = state.budgets[opener - 1];
 
   return `
@@ -442,7 +456,7 @@ function renderOpeningPhase() {
       ${renderRoundBanner("Opening Bid")}
       ${renderCharacterCard()}
 
-      <div class="bidder-panel">
+      <div class="bidder-panel" style="--accent:${openerAv.accent}">
         ${renderTurnBanner(opener, `Opening bid &middot; &yen;${remaining} available`)}
         <p class="calc-note center">Must bid at least &yen;1 to open the auction. Pick an amount, then confirm.</p>
         <div class="bid-quick-row">
@@ -463,6 +477,7 @@ function renderOpeningPhase() {
 
 function renderBiddingPhase() {
   const turnPlayer = state.auctionOrder[state.turnIndex];
+  const turnAv = avatarMeta(state.avatarAssign[turnPlayer - 1]);
   const bidderAv = avatarMeta(state.avatarAssign[state.currentBidder - 1]);
   const remaining = state.budgets[turnPlayer - 1];
   const minRaise = state.currentBid + 1;
@@ -493,7 +508,7 @@ function renderBiddingPhase() {
         <img class="bid-hero-avatar" src="${bidderAv.image}" alt="" />
       </div>
 
-      <div class="bidder-panel">
+      <div class="bidder-panel" style="--accent:${turnAv.accent}">
         ${renderTurnBanner(turnPlayer, `Your turn &middot; &yen;${remaining} available`)}
         <div class="btn-row" style="margin-top:14px;">
           <button class="btn ghost" data-action="withdrawBid">Withdraw &mdash; let them have it for &yen;${state.currentBid}</button>
@@ -509,14 +524,14 @@ function renderBiddingPhase() {
 }
 
 function renderFreeChoicePhase() {
-  const giveAv = avatarMeta(state.avatarAssign[state.freeChoiceGiveTarget - 1]);
+  const chooserAv = avatarMeta(state.avatarAssign[state.freeChoicePlayer - 1]);
 
   return `
     <div class="screen">
       ${renderRoundBanner()}
       ${renderCharacterCard()}
       <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any &yen; left — no one to bid against.</p>
-      <div class="bidder-panel">
+      <div class="bidder-panel" style="--accent:${chooserAv.accent}">
         ${renderTurnBanner(state.freeChoicePlayer, "Your choice")}
         <div class="btn-row" style="margin-top:14px;">
           <button class="btn" data-action="freeChoiceTake">Take for &yen;0</button>
@@ -661,14 +676,17 @@ function withdrawBid() {
 }
 
 // After a raise or withdrawal, step forward until we land on a player who
-// can actually afford the current bid, or resolve if only one is left.
+// can actually raise, or resolve if only one is left. There's no "take at
+// this price" move, so a player whose budget doesn't exceed the standing
+// bid has nothing to do but withdraw — skip that empty click and fold them
+// automatically, same as someone who can't even match the bid.
 function advanceToValidTurnOrResolve() {
   if (state.auctionOrder.length === 1) {
     resolveRoundWinner(state.auctionOrder[0], state.currentBid);
     return;
   }
   const player = state.auctionOrder[state.turnIndex];
-  if (state.budgets[player - 1] < state.currentBid) {
+  if (state.budgets[player - 1] <= state.currentBid) {
     state.auctionOrder.splice(state.turnIndex, 1);
     state.turnIndex = state.turnIndex % state.auctionOrder.length;
     advanceToValidTurnOrResolve();
@@ -710,6 +728,7 @@ function advanceRound() {
  * ------------------------------------------------------------------- */
 
 function renderVsScreen() {
+  setBodyAccent(avatarMeta(state.results.teams[0].avatarId).accent);
   const revealed = state.results.revealed;
   const cards = state.results.teams
     .map((t, i) => {
@@ -746,6 +765,7 @@ function renderVsScreen() {
 
 function renderResultsScreen() {
   const ranked = [...state.results.teams].sort((a, b) => b.finalScore - a.finalScore);
+  setBodyAccent(avatarMeta(ranked[0].avatarId).accent);
 
   const rankingHtml = ranked
     .map((t, i) => {
