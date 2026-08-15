@@ -11,6 +11,12 @@ const TEAM_SIZE = 3;
 const STARTING_BUDGET = 20; // yen (¥)
 const DRAW_ANIMATION_MS = 800;
 
+// Bump this whenever data/characters.json is regenerated (tier list edits).
+// It's appended as a cache-busting query param on the fetch below so a
+// roster update goes out immediately instead of waiting on the CDN's/
+// browser's cache to expire (GitHub Pages caches static files for ~10min).
+const DATA_VERSION = 3;
+
 // Player identity is now an avatar portrait, not a color name. Each avatar
 // carries one accent color (eyeballed from the artwork) used sparingly as a
 // decorative highlight — never as the primary way to tell players apart.
@@ -151,7 +157,7 @@ function resetGame() {
  * Boot
  * ------------------------------------------------------------------- */
 
-fetch("data/characters.json")
+fetch(`data/characters.json?v=${DATA_VERSION}`)
   .then((r) => r.json())
   .then((db) => {
     state.db = db;
