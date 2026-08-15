@@ -2,9 +2,9 @@
 
 A 2–4 player auction-draft battle game built from the Naruto and One Piece
 tier-list spreadsheets in this repo. Pick a universe, then fight the other
-players over CHF for characters the game draws at random — you never pick
-a character directly, only how much you're willing to pay for the one it
-shows you, and only its name is revealed (no stats) while you're bidding.
+players over yen (¥) for characters the game draws at random — you never
+pick a character directly, only how much you're willing to pay for the one
+it shows you, and only its name is revealed (no stats) while you're bidding.
 See a fully transparent, reproducible score decide the winner.
 
 ## How the draft works
@@ -16,16 +16,16 @@ simultaneous bid:
 1. The game randomly draws one character not yet auctioned and reveals
    only its name — no power, tier, or rank, so bids are never stat-informed.
 2. Who opens the bidding rotates every round (randomized at game start),
-   skipping anyone who's out of CHF. The opener must bid at least 1 CHF.
-3. Turn passes to the next player, who either **TAKEs** the standing price
-   (winning immediately), **RAISEs** it, or **WITHDRAWs** from this auction
-   only (they stay in the game). Play continues until someone takes, or
-   everyone else has withdrawn and the last bidder standing wins by default.
+   skipping anyone who's out of yen. The opener must bid at least ¥1.
+3. Turn passes to the next player, who either **RAISEs** the standing bid
+   or **WITHDRAWs** from this auction only (they stay in the game — there's
+   no "take at this price" shortcut). Play continues until everyone else
+   has withdrawn and the last bidder standing wins at their own bid.
 4. The winner's budget drops by what they paid, and the character joins
    their team.
 5. Repeat until every player has exactly 3 characters.
 
-Reaching 0 CHF doesn't eliminate a player — they just can't outbid anyone.
+Reaching ¥0 doesn't eliminate a player — they just can't outbid anyone.
 If every remaining opponent in a round is also broke, the character is
 handed out for free via turn order; if exactly one player still has money,
 that player gets a simplified choice (take it free, or hand it to whoever's

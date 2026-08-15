@@ -8,7 +8,7 @@
 // NOT a fixed count — the game keeps drawing characters and running
 // alternating (English-style) auctions until every player has TEAM_SIZE.
 const TEAM_SIZE = 3;
-const STARTING_BUDGET = 20; // CHF
+const STARTING_BUDGET = 20; // yen (¥)
 const QUICK_RAISE_STEPS = [1, 2, 3, 5, 10]; // offsets above the current minimum bid
 const DRAW_ANIMATION_MS = 800;
 
@@ -73,7 +73,7 @@ const state = {
   colorAssign: [], // index = playerNumber-1, value = color id
   colorStep: 0,
   draftPicks: [], // array of arrays of {..character, paid}, index = playerNumber-1
-  budgets: [], // index = playerNumber-1, CHF remaining
+  budgets: [], // index = playerNumber-1, yen (¥) remaining
   round: 0, // 1-indexed, up to totalRounds (display only — see TEAM_SIZE note above)
   totalRounds: 0, // playerCount x TEAM_SIZE, total characters sold this game
   draftedIds: new Set(), // character ids already auctioned off this game
@@ -259,10 +259,11 @@ function renderColorScreen() {
  * THE GAME CHOOSES THE CHARACTER. THE PLAYERS FIGHT OVER THE PRICE.
  * Each round the game draws one random character and reveals ONLY its
  * name — no power, tier, or rank, so bids are never stat-informed. A
- * rotating opener must bid at least 1 CHF; each other player in turn
- * either TAKEs the standing price (winning immediately), RAISEs it, or
- * WITHDRAWs from this auction only. Reaching 0 CHF doesn't eliminate a
- * player — every player must finish with exactly TEAM_SIZE characters,
+ * rotating opener must bid at least ¥1; each other player in turn either
+ * RAISEs the standing bid or WITHDRAWs from this auction only (there is
+ * no "take at this price" shortcut — the price only stops climbing once
+ * everyone but one player has withdrawn). Reaching ¥0 doesn't eliminate
+ * a player — every player must finish with exactly TEAM_SIZE characters,
  * so broke players still receive characters (for free) once nobody else
  * is left to bid against them.
  * ------------------------------------------------------------------- */
@@ -292,11 +293,11 @@ function renderTeamsSidebar(highlightPlayer) {
     const isCurrent = num === highlightPlayer;
     const rows = Array.from({ length: TEAM_SIZE }, (_, slot) => {
       const c = picks[slot];
-      return `<li class="${c ? "filled" : ""}">${c ? `&#9679; ${escapeHtml(c.displayName)} &mdash; ${c.paid} CHF` : "&#9675; empty"}</li>`;
+      return `<li class="${c ? "filled" : ""}">${c ? `&#9679; ${escapeHtml(c.displayName)} &mdash; &yen;${c.paid}` : "&#9675; empty"}</li>`;
     }).join("");
     return `
       <div class="team-box ${isCurrent ? "current" : ""}" style="--glow-color:${m.hex}">
-        <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()} &middot; ${state.budgets[i]} CHF</h4>
+        <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()} &middot; &yen;${state.budgets[i]}</h4>
         <ul>${rows}</ul>
       </div>`;
   }).join("");
@@ -362,7 +363,7 @@ function renderOpeningPhase() {
   const amounts = quickBidAmounts(1, remaining);
 
   const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="placeOpeningBid" data-value="${amt}">${amt}</button>`)
+    .map((amt) => `<button class="btn bid-btn" data-action="placeOpeningBid" data-value="${amt}">&yen;${amt}</button>`)
     .join("");
 
   return `
@@ -371,8 +372,8 @@ function renderOpeningPhase() {
       ${renderCharacterCard()}
 
       <div class="bidder-panel">
-        ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; ${remaining} CHF`)}
-        <p class="calc-note center">Must bid at least 1 CHF to open the auction.</p>
+        ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; &yen;${remaining}`)}
+        <p class="calc-note center">Must bid at least &yen;1 to open the auction.</p>
         <div class="bid-quick-row">
           ${quickButtons}
           <button class="btn bid-btn all-in" data-action="placeOpeningBid" data-value="${remaining}">ALL IN</button>
@@ -402,15 +403,17 @@ function renderBiddingPhase() {
     .map((p) => {
       const m = colorMeta(state.colorAssign[p - 1]);
       const cls = p === turnPlayer ? "active" : p === state.currentBidder ? "done" : "";
-      const label = p === state.currentBidder ? `HIGH BID ${state.currentBid} CHF` : "in auction";
+      const label = p === state.currentBidder ? `HIGH BID &yen;${state.currentBid}` : "in auction";
       return `<div class="player-pill ${cls}">${m.emoji} P${p}: ${label}</div>`;
     })
     .join("");
 
   const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="raiseBid" data-value="${amt}">${amt}</button>`)
+    .map((amt) => `<button class="btn bid-btn" data-action="raiseBid" data-value="${amt}">&yen;${amt}</button>`)
     .join("");
 
+  // TAKE (instant-win at the standing price) doesn't exist — a player either
+  // raises the bid or withdraws and lets it go to whoever's still in.
   const raiseControls = canRaise
     ? `
       <div class="bid-quick-row">
@@ -421,7 +424,7 @@ function renderBiddingPhase() {
         <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Custom amount" />
         <button class="btn secondary" data-action="raiseBidCustom">Raise</button>
       </div>`
-    : `<p class="calc-note center">Not enough CHF left to raise.</p>`;
+    : `<p class="calc-note center">Not enough &yen; left to raise.</p>`;
 
   return `
     <div class="screen">
@@ -430,17 +433,15 @@ function renderBiddingPhase() {
 
       <div class="bid-hero">
         <div class="bid-hero-label">CURRENT BID</div>
-        <div class="bid-hero-amount" style="color:${bidderMeta.hex};background:rgba(0,0,0,0.35);">${state.currentBid} CHF</div>
-        <div class="bid-hero-by">bid by ${bidderMeta.emoji} PLAYER ${state.currentBidder} &mdash; ${bidderMeta.label.toUpperCase()}</div>
+        <div class="bid-hero-amount" style="color:${bidderMeta.hex};background:rgba(0,0,0,0.35);">&yen;${state.currentBid}</div>
       </div>
 
       <div class="player-track">${track}</div>
 
       <div class="bidder-panel">
-        ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; ${remaining} CHF`)}
+        ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; &yen;${remaining}`)}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn" data-action="takeBid">TAKE FOR ${state.currentBid} CHF</button>
-          <button class="btn secondary" data-action="withdrawBid">WITHDRAW</button>
+          <button class="btn secondary" data-action="withdrawBid">WITHDRAW &mdash; let them have it</button>
         </div>
         ${raiseControls}
       </div>
@@ -459,11 +460,11 @@ function renderFreeChoicePhase() {
     <div class="screen">
       ${renderRoundBanner()}
       ${renderCharacterCard()}
-      <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any CHF left — no one to bid against.</p>
+      <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any &yen; left — no one to bid against.</p>
       <div class="bidder-panel">
         ${renderTurnBanner(state.freeChoicePlayer, "&mdash; YOUR CHOICE")}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn" data-action="freeChoiceTake">TAKE FOR 0 CHF</button>
+          <button class="btn" data-action="freeChoiceTake">TAKE FOR &yen;0</button>
           <button class="btn secondary" data-action="freeChoiceGive">GIVE TO ${giveMeta.label.toUpperCase()}</button>
         </div>
       </div>
@@ -486,7 +487,7 @@ function renderWinnerPhase() {
       ${renderRoundBanner()}
       <div class="winner-banner" style="color:${m.hex}">${m.emoji} ${m.label.toUpperCase()} WINS!</div>
       <div class="center" style="margin-bottom:20px;">
-        <strong>${escapeHtml(c.displayName)}</strong> joined ${m.label.toUpperCase()} for ${amount} CHF
+        <strong>${escapeHtml(c.displayName)}</strong> joined ${m.label.toUpperCase()} for &yen;${amount}
       </div>
       <div class="draft-layout">
         <div></div>
@@ -588,11 +589,6 @@ function raiseBid(rawAmount) {
   state.currentBidder = player;
   state.turnIndex = (state.turnIndex + 1) % state.auctionOrder.length;
   advanceToValidTurnOrResolve();
-}
-
-function takeBid() {
-  const player = state.auctionOrder[state.turnIndex];
-  resolveRoundWinner(player, state.currentBid);
 }
 
 function withdrawBid() {
@@ -711,7 +707,7 @@ function renderResultsScreen() {
     .map((t) => {
       const m = colorMeta(t.color);
       const memberRows = t.members
-        .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)} <span style="color:var(--text-dim);">(${c.paid} CHF)</span></span><span>${c.stats.power}</span></div>`)
+        .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)} <span style="color:var(--text-dim);">(&yen;${c.paid})</span></span><span>${c.stats.power}</span></div>`)
         .join("");
       return `
         <div class="team-detail-card" style="border-color:${m.hex}">
@@ -974,10 +970,6 @@ function bindEvents() {
         raiseBid(amount);
         break;
       }
-
-      case "takeBid":
-        takeBid();
-        break;
 
       case "withdrawBid":
         withdrawBid();

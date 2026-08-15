@@ -417,13 +417,6 @@ body {
   clip-path: polygon(6% 0, 100% 0, 94% 100%, 0 100%);
   animation: numberPulse 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
-.bid-hero-by {
-  font-family: var(--font-hud);
-  font-weight: 600;
-  color: var(--text-dim);
-  font-size: 0.9rem;
-}
-
 .turn-banner {
   display: flex;
   align-items: center;
