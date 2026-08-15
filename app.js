@@ -267,7 +267,7 @@ function renderAvatarScreen() {
     return `
       <div class="avatar-thumb ${isTaken ? "taken" : ""} ${isActive ? "active" : ""}"
            ${isTaken ? "" : `data-action="highlightAvatar" data-value="${a.id}"`}>
-        <img src="${a.image}" alt="" loading="lazy" />
+        <img src="${a.image}" alt="" width="640" height="640" />
         ${isTaken ? '<span class="avatar-thumb-taken">TAKEN</span>' : ""}
       </div>`;
   }).join("");
@@ -282,7 +282,7 @@ function renderAvatarScreen() {
       <div class="player-pip-row">${track}</div>
       <div class="section-label">Player ${playerNum} &mdash; Select Avatar</div>
       <div class="avatar-stage">
-        <img class="avatar-stage-img" src="${featured.image}" alt="" />
+        <img class="avatar-stage-img" src="${featured.image}" alt="" width="640" height="640" />
       </div>
       <div class="avatar-thumb-row">${thumbs}</div>
       <div class="btn-row">
@@ -369,7 +369,7 @@ function renderTeamsSidebar(highlightPlayer) {
     }).join("");
     return `
       <div class="hud-card ${isCurrent ? "current" : ""}">
-        <img class="hud-avatar" src="${av.image}" alt="" />
+        <img class="hud-avatar" src="${av.image}" alt="" width="640" height="640" />
         <div class="hud-info">
           <div class="hud-name">Player ${num}</div>
           <div class="hud-budget">&yen;${state.budgets[i]}</div>
@@ -408,7 +408,7 @@ function renderTurnBanner(playerNum, label) {
   const av = avatarMeta(state.avatarAssign[playerNum - 1]);
   return `
     <div class="turn-banner">
-      <img class="turn-banner-avatar" src="${av.image}" alt="" />
+      <img class="turn-banner-avatar" src="${av.image}" alt="" width="640" height="640" />
       <div class="turn-banner-text">
         <div class="turn-banner-player">Player ${playerNum}</div>
         <div class="turn-banner-label">${label}</div>
@@ -508,7 +508,7 @@ function renderBiddingPhase() {
       <div class="bid-hero">
         <div class="bid-hero-label">Current Bid</div>
         <div class="bid-hero-amount">&yen;${state.currentBid}</div>
-        <img class="bid-hero-avatar" src="${bidderAv.image}" alt="" />
+        <img class="bid-hero-avatar" src="${bidderAv.image}" alt="" width="640" height="640" />
       </div>
 
       <div class="bidder-panel">
@@ -557,7 +557,7 @@ function renderWinnerPhase() {
     <div class="screen">
       ${renderRoundBanner()}
       <div class="acquire-stage">
-        <img class="acquire-avatar" src="${av.image}" alt="" />
+        <img class="acquire-avatar" src="${av.image}" alt="" width="640" height="640" />
         <div class="acquire-text">
           <div class="acquire-eyebrow">Acquired</div>
           <div class="acquire-name">${escapeHtml(c.displayName)}</div>
@@ -740,7 +740,7 @@ function renderVsScreen() {
       const sep = i < state.results.teams.length - 1 ? `<div class="vs-sep">VS</div>` : "";
       return `
         <div class="vs-card">
-          <img class="vs-card-avatar" src="${av.image}" alt="" />
+          <img class="vs-card-avatar" src="${av.image}" alt="" width="640" height="640" />
           <div class="name">Player ${t.playerNum}</div>
           ${scoreHtml}
         </div>${sep}`;
@@ -775,7 +775,7 @@ function renderResultsScreen() {
       return `
         <div class="rank-row ${rankClass}">
           <div class="rank-medal">${MEDALS[i]}</div>
-          <img class="rank-avatar" src="${av.image}" alt="" />
+          <img class="rank-avatar" src="${av.image}" alt="" width="640" height="640" />
           <div class="rank-name">Player ${t.playerNum}</div>
           <div class="rank-score">${t.finalScore.toFixed(1)}</div>
         </div>`;
@@ -798,7 +798,7 @@ function renderResultsScreen() {
         .join("");
       return `
         <div class="team-detail-card">
-          <h3><img class="team-detail-avatar" src="${av.image}" alt="" />Player ${t.playerNum}</h3>
+          <h3><img class="team-detail-avatar" src="${av.image}" alt="" width="640" height="640" />Player ${t.playerNum}</h3>
           ${memberRows}
           <div class="team-score-line"><span>Team Score</span><span>${t.finalScore.toFixed(1)}</span></div>
           <button class="breakdown-link" data-action="openBreakdown" data-value="${t.playerNum}">How was this score calculated?</button>
