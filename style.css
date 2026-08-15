@@ -1,14 +1,23 @@
 :root {
-  --ink: #0b0a12;
-  --ink-2: #17141f;
-  --paper: #fff9f0;
-  --text: var(--paper);
-  --text-dim: rgba(255, 249, 240, 0.62);
-  --text-faint: rgba(255, 249, 240, 0.36);
-  --line: rgba(255, 249, 240, 0.14);
-  --line-strong: rgba(255, 249, 240, 0.28);
+  --ink: #08080f;
+  --ink-2: #141320;
+  --text: #f5f1ea;
+  --text-dim: rgba(245, 241, 234, 0.6);
+  --text-faint: rgba(245, 241, 234, 0.28);
+  --line: rgba(245, 241, 234, 0.12);
+  --line-strong: rgba(245, 241, 234, 0.24);
+
+  /* Drives ONLY the full-screen background burst — retinted per drawn
+     character by JS (setBodyAccent). Nothing else reads this variable,
+     so character art color never bleeds into UI chrome or text. */
   --accent: #ffab2e;
-  --brand: #ffcf5c; /* fixed color for chrome text (round counter, tags, labels) — never tied to a character's or player's accent */
+
+  /* Fixed, never retinted — color = interaction, not decoration. */
+  --action-confirm: #ffb020; /* Take / Confirm / positive progression */
+  --action-raise: #5fc9e8; /* Raise (cool, "push the price up") */
+  --action-withdraw: #e5677e; /* Withdraw / Give away (decline) */
+  --active: rgba(255, 255, 255, 0.85); /* one global "it's happening now" ring — never player-specific */
+  --chip-accent: var(--action-confirm); /* selected bid-chip color; raise controls override this locally */
 
   --font-impact: "Anton", "Arial Black", sans-serif;
   --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
@@ -20,63 +29,78 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  width: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  background: var(--ink);
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 400;
 }
 
-body {
-  position: relative;
-  background-color: var(--ink);
-  transition: background-color 0.4s ease;
-}
-
-/* Full-viewport sunburst + halftone backdrop, keyed to --accent (set by JS
-   per-screen via setBodyAccent()). Fixed positioning means it's never
-   cropped by a container — it's behind the whole page, not one panel. */
+/* Full-viewport backdrop. Fixed + inset:0 + explicit vw/dvh sizing means it
+ * is anchored to the SCREEN, not to #app or any max-width content column —
+ * it covers every pixel of the viewport at any aspect ratio, with no mask
+ * fade that could leave a corner uncovered, and keeps covering the screen
+ * even if the page scrolls past one viewport height. Retinted per drawn
+ * character via --accent; kept deliberately low-intensity (~14%) so it
+ * supports the UI instead of competing with it. */
 body::before {
   content: "";
   position: fixed;
-  inset: -20%;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
   z-index: -3;
   background: repeating-conic-gradient(
     from 0deg,
     var(--accent) 0deg 13deg,
     transparent 13deg 30deg
   );
-  opacity: 0.3;
-  animation: spinSlow 50s linear infinite;
-  mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 85%);
-  -webkit-mask-image: radial-gradient(circle at 50% 32%, black 0%, transparent 85%);
+  opacity: 0.14;
+  animation: spinSlow 60s linear infinite;
+  pointer-events: none;
 }
 body::after {
   content: "";
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100dvh;
   z-index: -2;
   background-image:
-    radial-gradient(ellipse 55% 40% at 10% 0%, rgba(255, 94, 126, 0.16), transparent 60%),
-    radial-gradient(ellipse 55% 40% at 90% 0%, rgba(58, 168, 255, 0.16), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(176, 107, 255, 0.12), transparent 60%);
+    radial-gradient(ellipse 55% 40% at 10% 0%, rgba(255, 94, 126, 0.1), transparent 60%),
+    radial-gradient(ellipse 55% 40% at 90% 0%, rgba(58, 168, 255, 0.1), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(176, 107, 255, 0.08), transparent 60%);
+  pointer-events: none;
 }
 
 #app {
   position: relative;
   z-index: 0;
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding: 40px 20px 80px;
+}
+
+/* Content (not the background) is what gets a max-width — the screen
+ * itself stays full-bleed. */
+.screen {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 40px 20px 80px;
-  min-height: 100vh;
+  animation: screenIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ---------------------------------------------------------------------
  * Motion
  * ------------------------------------------------------------------- */
 
-.screen {
-  animation: screenIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
 @keyframes screenIn {
   from { opacity: 0; transform: translateY(10px) scale(0.99); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -95,8 +119,8 @@ body::after {
   100% { transform: scale(1); opacity: 1; }
 }
 @keyframes ringPulse {
-  0%, 100% { box-shadow: 0 0 0 2px var(--accent); }
-  50% { box-shadow: 0 0 0 4px var(--accent); }
+  0%, 100% { box-shadow: 0 0 0 2px var(--active); }
+  50% { box-shadow: 0 0 0 4px var(--active); }
 }
 @keyframes dotBlink { 0%, 20% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes driftMark {
@@ -108,13 +132,9 @@ body::after {
   to { transform: rotate(360deg); }
 }
 
-/* The sunburst/halftone backdrop now lives on body::before/::after (fixed,
- * full-viewport, keyed to --accent) so it's never cropped by a container —
- * see the `body` rules above. Hero panels below are just transparent
- * windows onto it. */
-
 /* ---------------------------------------------------------------------
- * Type — manga poster impact
+ * Type — one primary color (off-white). Depth comes from a plain dark
+ * shadow, never a colored one; color is reserved for interactive choices.
  * ------------------------------------------------------------------- */
 
 .title {
@@ -124,8 +144,8 @@ body::after {
   letter-spacing: 1px;
   margin: 6px 0 18px;
   line-height: 1;
-  color: var(--paper);
-  text-shadow: 3px 3px 0 var(--accent), 6px 6px 0 color-mix(in srgb, var(--accent) 55%, black), 10px 10px 18px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 10px 24px rgba(0, 0, 0, 0.4);
 }
 .title.serif-em {
   font-size: clamp(2.8rem, 9vw, 5rem);
@@ -156,12 +176,12 @@ body::after {
   font-size: 1rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--brand);
+  color: var(--text-dim);
   margin: 0 0 26px;
 }
 
 /* ---------------------------------------------------------------------
- * Buttons — bold color, angled, comic energy
+ * Buttons — color signals what kind of choice this is, nothing else.
  * ------------------------------------------------------------------- */
 
 .btn {
@@ -169,7 +189,7 @@ body::after {
   font-weight: 400;
   letter-spacing: 1.5px;
   font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, black));
+  background: linear-gradient(135deg, var(--action-confirm), color-mix(in srgb, var(--action-confirm) 55%, black));
   color: #1a0d00;
   border: none;
   clip-path: polygon(6% 0, 100% 0, 94% 100%, 0% 100%);
@@ -181,13 +201,26 @@ body::after {
 .btn:active { transform: translateY(1px) scale(0.98); }
 .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; filter: none; }
 
-.btn.ghost {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--paper);
-  border: 2px solid var(--accent);
+.btn.raise {
+  background: linear-gradient(135deg, var(--action-raise), color-mix(in srgb, var(--action-raise) 55%, black));
+  color: #041a22;
+}
+
+.btn.withdraw {
+  background: color-mix(in srgb, var(--action-withdraw) 14%, transparent);
+  color: var(--text);
+  border: 2px solid var(--action-withdraw);
   clip-path: none;
 }
-.btn.ghost:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); filter: none; }
+.btn.withdraw:hover { background: color-mix(in srgb, var(--action-withdraw) 26%, transparent); filter: none; }
+
+.btn.ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 2px solid var(--line-strong);
+  clip-path: none;
+}
+.btn.ghost:hover { color: var(--text); border-color: var(--text-dim); filter: none; }
 
 .btn-row {
   display: flex;
@@ -220,9 +253,7 @@ body::after {
   background: rgba(255, 255, 255, 0.02);
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
-.world-card:nth-child(1) { --accent: #ff7a3d; }
-.world-card:nth-child(2) { --accent: #3aa8ff; }
-.world-card:hover { transform: translateY(-6px); border-color: var(--accent); }
+.world-card:hover { transform: translateY(-6px); border-color: var(--action-confirm); }
 .world-card-emoji {
   display: block;
   font-size: 3rem;
@@ -234,8 +265,8 @@ body::after {
   font-family: var(--font-impact);
   font-size: 1.7rem;
   letter-spacing: 1px;
-  color: var(--paper);
-  text-shadow: 2px 2px 0 var(--accent);
+  color: var(--text);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
 }
 .world-card-meta {
   font-family: var(--font-display);
@@ -267,18 +298,15 @@ body::after {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: rgba(255, 171, 46, 0.04);
+  background: rgba(255, 255, 255, 0.02);
   transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
-.lobby-choice:nth-child(1) { --accent: #ff5e7e; }
-.lobby-choice:nth-child(2) { --accent: #ffab2e; }
-.lobby-choice:nth-child(3) { --accent: #3aa8ff; }
-.lobby-choice:hover { border-color: var(--accent); transform: translateY(-4px) scale(1.05); background: rgba(255, 171, 46, 0.1); }
+.lobby-choice:hover { border-color: var(--action-confirm); transform: translateY(-4px) scale(1.05); background: color-mix(in srgb, var(--action-confirm) 8%, transparent); }
 .lobby-choice-num {
   font-family: var(--font-impact);
   font-size: 2.6rem;
   line-height: 1;
-  color: var(--paper);
+  color: var(--text);
 }
 .lobby-choice-label {
   font-family: var(--font-display);
@@ -308,8 +336,8 @@ body::after {
   border-radius: 20px;
   padding: 4px 14px;
 }
-.player-pip.done { color: var(--text); border-color: var(--accent); }
-.player-pip.active { color: #1a0d00; background: var(--accent); border-color: var(--accent); }
+.player-pip.done { color: var(--text); border-color: var(--line-strong); }
+.player-pip.active { color: #1a0d00; background: var(--action-confirm); border-color: var(--action-confirm); }
 
 .avatar-stage {
   position: relative;
@@ -319,7 +347,7 @@ body::after {
   justify-content: center;
   border-radius: 16px;
   overflow: hidden;
-  border: 3px solid var(--accent);
+  border: 2px solid var(--line-strong);
 }
 .avatar-stage-img {
   position: relative;
@@ -350,7 +378,11 @@ body::after {
 }
 .avatar-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
 .avatar-thumb:hover:not(.taken) { opacity: 0.9; transform: translateY(-3px) scale(1.05); }
-.avatar-thumb.active { opacity: 1; border-color: var(--accent); transform: translateY(-4px) scale(1.08); animation: ringPulse 1.6s ease-in-out infinite; }
+.avatar-thumb.active {
+  opacity: 1;
+  border-color: var(--action-confirm);
+  transform: translateY(-4px) scale(1.08);
+}
 .avatar-thumb.taken { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); }
 .avatar-thumb-taken {
   position: absolute;
@@ -384,8 +416,8 @@ body::after {
   font-family: var(--font-impact);
   font-size: 2.8rem;
   letter-spacing: 1px;
-  color: var(--paper);
-  text-shadow: 2px 2px 0 var(--brand);
+  color: var(--text);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
 }
 .round-banner-total {
   font-family: var(--font-display);
@@ -399,7 +431,7 @@ body::after {
   font-family: var(--font-display);
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--brand);
+  color: var(--text-dim);
   margin: 0 0 20px;
   font-size: 1rem;
 }
@@ -411,7 +443,6 @@ body::after {
   padding: 60px 24px;
   text-align: center;
 }
-.reveal-stage.drawing { --accent: #66607a; }
 .reveal-eyebrow {
   position: relative;
   z-index: 1;
@@ -429,8 +460,8 @@ body::after {
   font-size: clamp(3rem, 10vw, 5.8rem);
   letter-spacing: 1px;
   line-height: 0.95;
-  color: var(--paper);
-  text-shadow: 3px 3px 0 var(--accent), 7px 7px 0 color-mix(in srgb, var(--accent) 55%, black);
+  color: var(--text);
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), 0 14px 30px rgba(0, 0, 0, 0.45);
   animation: popIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-mark {
@@ -450,7 +481,8 @@ body::after {
 .dots span:nth-child(3) { animation-delay: 0.4s; }
 
 /* ---------------------------------------------------------------------
- * Turn banner + bidder panel
+ * Turn banner + bidder panel — "it's happening now" uses ONE global
+ * active indicator (a soft white ring), never a player-specific color.
  * ------------------------------------------------------------------- */
 
 .turn-banner {
@@ -462,8 +494,8 @@ body::after {
   margin: 0 auto 18px;
   padding: 10px 20px;
   border-radius: 40px;
-  border: 2px solid var(--accent);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 18%, transparent), transparent);
+  border: 2px solid var(--active);
+  background: rgba(255, 255, 255, 0.04);
 }
 .turn-banner-avatar {
   width: 46px;
@@ -471,14 +503,14 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   object-position: top center;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--active);
 }
 .turn-banner-text { text-align: left; }
 .turn-banner-player {
   font-family: var(--font-impact);
   font-size: 1.2rem;
   letter-spacing: 0.5px;
-  color: var(--paper);
+  color: var(--text);
 }
 .turn-banner-label {
   font-family: var(--font-body);
@@ -507,8 +539,8 @@ body::after {
   font-family: var(--font-impact);
   font-size: clamp(2.8rem, 9vw, 4rem);
   letter-spacing: 1px;
-  color: var(--accent);
-  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.4);
+  color: var(--text);
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.4);
   animation: numberPulse 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .bid-hero-avatar {
@@ -517,7 +549,7 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   object-position: top center;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--line-strong);
   vertical-align: middle;
   margin-left: 10px;
 }
@@ -545,13 +577,18 @@ body::after {
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, transform 0.1s ease;
 }
-.chip-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--paper); transform: translateY(-1px); }
-.chip-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+.chip-btn:hover:not(:disabled) { border-color: var(--text-dim); color: var(--text); transform: translateY(-1px); }
+.chip-btn:disabled { opacity: 0.18; cursor: not-allowed; }
 .chip-btn.selected {
-  border-color: var(--accent);
-  color: #1a0d00;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, black));
+  border-color: var(--chip-accent);
+  color: #0a0a0a;
+  background: linear-gradient(135deg, var(--chip-accent), color-mix(in srgb, var(--chip-accent) 55%, black));
 }
+
+/* Raise controls get their own color scope so the selected chip and the
+   Raise button agree with each other (cyan), distinct from the gold used
+   for opening/confirm bids and the coral used for withdrawing. */
+.action-raise { --chip-accent: var(--action-raise); }
 
 .bid-custom-row {
   display: flex;
@@ -569,7 +606,7 @@ body::after {
   font-family: var(--font-display);
   font-size: 1.05rem;
 }
-.bid-custom-row input:focus { outline: none; border-color: var(--accent); }
+.bid-custom-row input:focus { outline: none; border-color: var(--chip-accent); }
 
 /* ---------------------------------------------------------------------
  * Team HUD
@@ -586,7 +623,7 @@ body::after {
   border: 2px solid var(--line);
   background: rgba(255, 255, 255, 0.02);
 }
-.hud-card.current { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.hud-card.current { border-color: var(--active); background: rgba(255, 255, 255, 0.05); }
 .hud-avatar {
   width: 50px;
   height: 50px;
@@ -596,17 +633,17 @@ body::after {
   border: 2px solid var(--line-strong);
   flex-shrink: 0;
 }
-.hud-card.current .hud-avatar { border-color: var(--accent); }
+.hud-card.current .hud-avatar { border-color: var(--active); }
 .hud-info { flex: 1; min-width: 0; }
 .hud-name {
   font-family: var(--font-impact);
   font-size: 1.05rem;
   letter-spacing: 0.5px;
-  color: var(--paper);
+  color: var(--text);
 }
 .hud-budget {
   font-size: 0.85rem;
-  color: var(--accent);
+  color: var(--text-dim);
   font-weight: 700;
 }
 .hud-team {
@@ -621,7 +658,7 @@ body::after {
 }
 .pip.filled {
   color: var(--text-dim);
-  border-bottom: 1px solid var(--accent);
+  border-bottom: 1px solid var(--line-strong);
   padding-bottom: 1px;
   max-width: 90px;
   overflow: hidden;
@@ -630,7 +667,9 @@ body::after {
 }
 
 /* ---------------------------------------------------------------------
- * Acquisition (round-winner) moment
+ * Acquisition (round-winner) moment — a completed positive decision, so
+ * the avatar ring is allowed the confirm accent; the character's own
+ * name stays neutral.
  * ------------------------------------------------------------------- */
 
 .acquire-stage {
@@ -646,7 +685,7 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   object-position: top center;
-  border: 4px solid var(--accent);
+  border: 4px solid var(--action-confirm);
   margin-bottom: 16px;
   animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -655,15 +694,15 @@ body::after {
   font-size: 0.85rem;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--brand);
+  color: var(--text-dim);
 }
 .acquire-name {
   font-family: var(--font-impact);
   font-size: clamp(2.2rem, 6vw, 3rem);
   letter-spacing: 0.5px;
   margin: 6px 0;
-  color: var(--paper);
-  text-shadow: 2px 2px 0 var(--accent);
+  color: var(--text);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
 }
 .acquire-meta {
   font-family: var(--font-display);
@@ -688,8 +727,8 @@ body::after {
   text-align: center;
   padding: 20px 26px;
   border-radius: 14px;
-  border: 2px solid var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 2px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.02);
 }
 .vs-card-avatar {
   width: 58px;
@@ -697,14 +736,14 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   object-position: top center;
-  border: 3px solid var(--accent);
+  border: 2px solid var(--line-strong);
   margin-bottom: 10px;
 }
 .vs-card .name { font-family: var(--font-display); font-size: 0.9rem; color: var(--text-dim); margin-bottom: 6px; letter-spacing: 0.5px; }
-.vs-card .score { font-family: var(--font-impact); font-size: 2.3rem; }
+.vs-card .score { font-family: var(--font-impact); font-size: 2.3rem; color: var(--text); }
 .vs-sep {
   font-family: var(--font-impact);
-  color: var(--accent);
+  color: var(--text-faint);
   font-size: 1.4rem;
 }
 
@@ -728,7 +767,7 @@ body::after {
   border: 2px solid var(--line);
   background: rgba(255, 255, 255, 0.02);
 }
-.rank-row.gold { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); box-shadow: 0 0 24px -8px var(--accent); }
+.rank-row.gold { border-color: var(--action-confirm); background: color-mix(in srgb, var(--action-confirm) 10%, transparent); box-shadow: 0 0 24px -8px var(--action-confirm); }
 .rank-medal { font-size: 1.4rem; width: 32px; text-align: center; }
 .rank-avatar {
   width: 38px;
@@ -738,9 +777,9 @@ body::after {
   object-position: top center;
   border: 2px solid var(--line-strong);
 }
-.rank-row.gold .rank-avatar { border-color: var(--accent); }
-.rank-name { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; flex: 1; letter-spacing: 0.5px; }
-.rank-score { font-family: var(--font-impact); font-size: 1.5rem; }
+.rank-row.gold .rank-avatar { border-color: var(--action-confirm); }
+.rank-name { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; flex: 1; letter-spacing: 0.5px; color: var(--text); }
+.rank-score { font-family: var(--font-impact); font-size: 1.5rem; color: var(--text); }
 
 .winner-banner {
   text-align: center;
@@ -748,7 +787,8 @@ body::after {
   font-family: var(--font-impact);
   font-size: clamp(1.5rem, 5vw, 2.2rem);
   letter-spacing: 0.5px;
-  text-shadow: 0 0 20px currentColor;
+  color: var(--text);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--action-confirm) 55%, transparent);
 }
 
 .teams-detail {
@@ -760,8 +800,8 @@ body::after {
 .team-detail-card {
   padding: 18px;
   border-radius: 14px;
-  border: 2px solid var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border: 2px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.02);
 }
 .team-detail-card h3 {
   margin: 0 0 12px;
@@ -771,7 +811,7 @@ body::after {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--paper);
+  color: var(--text);
 }
 .team-detail-avatar {
   width: 34px;
@@ -779,7 +819,7 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   object-position: top center;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--line-strong);
 }
 .team-detail-card .member-row {
   display: flex;
@@ -787,15 +827,17 @@ body::after {
   font-size: 0.88rem;
   padding: 5px 0;
   border-bottom: 1px dotted var(--line);
+  color: var(--text-dim);
 }
 .team-detail-card .member-row:last-of-type { border-bottom: none; }
 .team-score-line {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 2px solid var(--accent);
+  border-top: 2px solid var(--line-strong);
   display: flex;
   justify-content: space-between;
   font-weight: 700;
+  color: var(--text);
 }
 .breakdown-link {
   display: inline-block;
@@ -803,14 +845,14 @@ body::after {
   font-family: var(--font-display);
   font-size: 0.78rem;
   letter-spacing: 0.5px;
-  color: var(--accent);
+  color: var(--text-faint);
   cursor: pointer;
   text-decoration: underline;
   background: none;
   border: none;
   padding: 0;
 }
-.breakdown-link:hover { color: var(--paper); }
+.breakdown-link:hover { color: var(--text); }
 
 .modal-overlay {
   position: fixed;
@@ -824,7 +866,7 @@ body::after {
 }
 .modal {
   background: var(--ink-2);
-  border: 2px solid var(--accent);
+  border: 2px solid var(--line-strong);
   border-radius: 14px;
   max-width: 560px;
   width: 100%;
@@ -832,7 +874,7 @@ body::after {
   overflow-y: auto;
   padding: 28px;
 }
-.modal h3 { margin-top: 0; font-family: var(--font-impact); letter-spacing: 0.5px; font-size: 1.4rem; }
+.modal h3 { margin-top: 0; font-family: var(--font-impact); letter-spacing: 0.5px; font-size: 1.4rem; color: var(--text); font-weight: 400; }
 .modal-close {
   float: right;
   background: none;
@@ -847,16 +889,18 @@ body::after {
   padding: 7px 0;
   border-bottom: 1px dotted var(--line);
   font-size: 0.88rem;
+  color: var(--text-dim);
 }
 .calc-row:last-of-type { border-bottom: none; }
 .calc-final {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 2px solid var(--accent);
+  border-top: 2px solid var(--line-strong);
   display: flex;
   justify-content: space-between;
   font-weight: 700;
   font-size: 1.1rem;
+  color: var(--text);
 }
 .calc-note { color: var(--text-dim); font-size: 0.8rem; margin-top: 12px; line-height: 1.6; }
 

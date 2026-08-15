@@ -266,7 +266,6 @@ function renderAvatarScreen() {
     const isActive = a.id === highlighted;
     return `
       <div class="avatar-thumb ${isTaken ? "taken" : ""} ${isActive ? "active" : ""}"
-           style="--accent:${a.accent}"
            ${isTaken ? "" : `data-action="highlightAvatar" data-value="${a.id}"`}>
         <img src="${a.image}" alt="" loading="lazy" />
         ${isTaken ? '<span class="avatar-thumb-taken">TAKEN</span>' : ""}
@@ -282,7 +281,7 @@ function renderAvatarScreen() {
     <div class="screen avatar-screen">
       <div class="player-pip-row">${track}</div>
       <div class="section-label">Player ${playerNum} &mdash; Select Avatar</div>
-      <div class="avatar-stage" style="--accent:${featured.accent}">
+      <div class="avatar-stage">
         <img class="avatar-stage-img" src="${featured.image}" alt="" />
       </div>
       <div class="avatar-thumb-row">${thumbs}</div>
@@ -369,7 +368,7 @@ function renderTeamsSidebar(highlightPlayer) {
         : `<span class="pip empty">&#9671;</span>`;
     }).join("");
     return `
-      <div class="hud-card ${isCurrent ? "current" : ""}" style="--accent:${av.accent}">
+      <div class="hud-card ${isCurrent ? "current" : ""}">
         <img class="hud-avatar" src="${av.image}" alt="" />
         <div class="hud-info">
           <div class="hud-name">Player ${num}</div>
@@ -398,9 +397,8 @@ function renderRoundBanner(tag) {
 // rendered enormous, IS the artwork — with a per-character accent wash.
 function renderCharacterCard() {
   const c = state.currentCharacter;
-  const accent = characterAccent(c);
   return `
-    <div class="reveal-stage" style="--accent:${accent}">
+    <div class="reveal-stage">
       <div class="reveal-eyebrow">Character</div>
       <div class="reveal-name">${escapeHtml(c.displayName)}</div>
     </div>`;
@@ -409,7 +407,7 @@ function renderCharacterCard() {
 function renderTurnBanner(playerNum, label) {
   const av = avatarMeta(state.avatarAssign[playerNum - 1]);
   return `
-    <div class="turn-banner" style="--accent:${av.accent}">
+    <div class="turn-banner">
       <img class="turn-banner-avatar" src="${av.image}" alt="" />
       <div class="turn-banner-text">
         <div class="turn-banner-player">Player ${playerNum}</div>
@@ -451,7 +449,6 @@ function renderBidAmountGrid(minBid, budget) {
 
 function renderOpeningPhase() {
   const opener = state.auctionOrder[0];
-  const openerAv = avatarMeta(state.avatarAssign[opener - 1]);
   const remaining = state.budgets[opener - 1];
 
   return `
@@ -459,7 +456,7 @@ function renderOpeningPhase() {
       ${renderRoundBanner("Opening Bid")}
       ${renderCharacterCard()}
 
-      <div class="bidder-panel" style="--accent:${openerAv.accent}">
+      <div class="bidder-panel">
         ${renderTurnBanner(opener, `Opening bid &middot; &yen;${remaining} available`)}
         <p class="calc-note center">Must bid at least &yen;1 to open the auction. Pick an amount, then confirm.</p>
         <div class="bid-quick-row">
@@ -480,7 +477,6 @@ function renderOpeningPhase() {
 
 function renderBiddingPhase() {
   const turnPlayer = state.auctionOrder[state.turnIndex];
-  const turnAv = avatarMeta(state.avatarAssign[turnPlayer - 1]);
   const bidderAv = avatarMeta(state.avatarAssign[state.currentBidder - 1]);
   const remaining = state.budgets[turnPlayer - 1];
   const minRaise = state.currentBid + 1;
@@ -488,15 +484,19 @@ function renderBiddingPhase() {
 
   // TAKE (instant-win at the standing price) doesn't exist — a player either
   // raises the bid or withdraws and lets it go to whoever's still in. Picking
-  // an amount only fills it in; RAISE confirms.
+  // an amount only fills it in; RAISE confirms. The raise controls get their
+  // own color scope (cyan) so the selected chip and Raise button match —
+  // Withdraw is a separate, deliberately different (coral) choice.
   const raiseControls = canRaise
     ? `
-      <div class="bid-quick-row">
-        ${renderBidAmountGrid(minRaise, remaining)}
-      </div>
-      <div class="bid-custom-row">
-        <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Amount" />
-        <button class="btn" data-action="raiseBidCustom">Raise</button>
+      <div class="action-raise">
+        <div class="bid-quick-row">
+          ${renderBidAmountGrid(minRaise, remaining)}
+        </div>
+        <div class="bid-custom-row">
+          <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Amount" />
+          <button class="btn raise" data-action="raiseBidCustom">Raise</button>
+        </div>
       </div>`
     : `<p class="calc-note center">Not enough &yen; left to raise.</p>`;
 
@@ -507,14 +507,14 @@ function renderBiddingPhase() {
 
       <div class="bid-hero">
         <div class="bid-hero-label">Current Bid</div>
-        <div class="bid-hero-amount" style="--accent:${bidderAv.accent}">&yen;${state.currentBid}</div>
+        <div class="bid-hero-amount">&yen;${state.currentBid}</div>
         <img class="bid-hero-avatar" src="${bidderAv.image}" alt="" />
       </div>
 
-      <div class="bidder-panel" style="--accent:${turnAv.accent}">
+      <div class="bidder-panel">
         ${renderTurnBanner(turnPlayer, `Your turn &middot; &yen;${remaining} available`)}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn ghost" data-action="withdrawBid">Withdraw &mdash; let them have it for &yen;${state.currentBid}</button>
+          <button class="btn withdraw" data-action="withdrawBid">Withdraw &mdash; let them have it for &yen;${state.currentBid}</button>
         </div>
         ${raiseControls}
       </div>
@@ -527,18 +527,16 @@ function renderBiddingPhase() {
 }
 
 function renderFreeChoicePhase() {
-  const chooserAv = avatarMeta(state.avatarAssign[state.freeChoicePlayer - 1]);
-
   return `
     <div class="screen">
       ${renderRoundBanner()}
       ${renderCharacterCard()}
       <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any &yen; left — no one to bid against.</p>
-      <div class="bidder-panel" style="--accent:${chooserAv.accent}">
+      <div class="bidder-panel">
         ${renderTurnBanner(state.freeChoicePlayer, "Your choice")}
         <div class="btn-row" style="margin-top:14px;">
           <button class="btn" data-action="freeChoiceTake">Take for &yen;0</button>
-          <button class="btn ghost" data-action="freeChoiceGive">Give to Player ${state.freeChoiceGiveTarget}</button>
+          <button class="btn withdraw" data-action="freeChoiceGive">Give to Player ${state.freeChoiceGiveTarget}</button>
         </div>
       </div>
       <div class="draft-layout mt-24">
@@ -558,7 +556,7 @@ function renderWinnerPhase() {
   return `
     <div class="screen">
       ${renderRoundBanner()}
-      <div class="acquire-stage" style="--accent:${av.accent}">
+      <div class="acquire-stage">
         <img class="acquire-avatar" src="${av.image}" alt="" />
         <div class="acquire-text">
           <div class="acquire-eyebrow">Acquired</div>
@@ -737,11 +735,11 @@ function renderVsScreen() {
     .map((t, i) => {
       const av = avatarMeta(t.avatarId);
       const scoreHtml = revealed
-        ? `<div class="score" data-score="${t.finalScore}" style="color:${av.accent}">${t.finalScore.toFixed(1)}</div>`
-        : `<div class="score" data-score="${t.finalScore}" style="color:var(--text-dim)">?</div>`;
+        ? `<div class="score" data-score="${t.finalScore}">${t.finalScore.toFixed(1)}</div>`
+        : `<div class="score" data-score="${t.finalScore}" style="color:var(--text-faint)">?</div>`;
       const sep = i < state.results.teams.length - 1 ? `<div class="vs-sep">VS</div>` : "";
       return `
-        <div class="vs-card" style="--accent:${av.accent}">
+        <div class="vs-card">
           <img class="vs-card-avatar" src="${av.image}" alt="" />
           <div class="name">Player ${t.playerNum}</div>
           ${scoreHtml}
@@ -785,7 +783,6 @@ function renderResultsScreen() {
     .join("");
 
   const winner = ranked[0];
-  const winnerAv = avatarMeta(winner.avatarId);
   const losers = ranked.slice(1).map((t) => `Player ${t.playerNum}`);
   const losersJoined =
     losers.length <= 1
@@ -800,7 +797,7 @@ function renderResultsScreen() {
         .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)} <span style="color:var(--text-dim);">(&yen;${c.paid})</span></span><span>${c.stats.power}</span></div>`)
         .join("");
       return `
-        <div class="team-detail-card" style="--accent:${av.accent}">
+        <div class="team-detail-card">
           <h3><img class="team-detail-avatar" src="${av.image}" alt="" />Player ${t.playerNum}</h3>
           ${memberRows}
           <div class="team-score-line"><span>Team Score</span><span>${t.finalScore.toFixed(1)}</span></div>
@@ -818,7 +815,7 @@ function renderResultsScreen() {
 
       <div class="ranking-list">${rankingHtml}</div>
 
-      <div class="winner-banner" style="color:${winnerAv.accent}">${losersJoined} ${slainVerb} slain by Player ${winner.playerNum}</div>
+      <div class="winner-banner">${losersJoined} ${slainVerb} slain by Player ${winner.playerNum}</div>
 
       <div class="section-label" style="margin-top:36px;">Team Comparison</div>
       <div class="teams-detail">${detailCards}</div>
@@ -967,7 +964,6 @@ function animateReveal() {
   if (btnRow) btnRow.disabled = true;
 
   const targets = scoreEls.map((el) => parseFloat(el.dataset.score));
-  const accents = state.results.teams.map((t) => avatarMeta(t.avatarId).accent);
   const duration = 1000;
   const start = performance.now();
 
@@ -975,7 +971,7 @@ function animateReveal() {
     const p = Math.min(1, (now - start) / duration);
     const eased = 1 - Math.pow(1 - p, 3);
     scoreEls.forEach((el, i) => {
-      el.style.color = accents[i];
+      el.style.color = "var(--text)";
       el.textContent = (targets[i] * eased).toFixed(1);
     });
     if (p < 1) {
