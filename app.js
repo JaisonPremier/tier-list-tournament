@@ -4,21 +4,19 @@
  * Constants
  * ------------------------------------------------------------------- */
 
-// Each auction round draws and sells exactly ONE character to exactly ONE
-// player, so the number of rounds is NOT the per-player team size — it's
-// the total number of characters that will be sold across the whole game.
-// To keep teams comparably sized (matching the "3 characters per team"
-// examples), total rounds scale with player count: playerCount x TEAM_SIZE.
-const TEAM_SIZE = 3; // target characters per player, on average
+// Every player finishes with EXACTLY this many characters. Draft rounds are
+// NOT a fixed count — the game keeps drawing characters and running
+// alternating (English-style) auctions until every player has TEAM_SIZE.
+const TEAM_SIZE = 3;
 const STARTING_BUDGET = 20; // CHF
-const QUICK_BID_AMOUNTS = [1, 2, 3, 5, 10];
+const QUICK_RAISE_STEPS = [1, 2, 3, 5, 10]; // offsets above the current minimum bid
 const DRAW_ANIMATION_MS = 800;
 
 const COLORS = [
-  { id: "red", label: "Red", emoji: "\u{1F534}", hex: "#ef4444" },
-  { id: "blue", label: "Blue", emoji: "\u{1F535}", hex: "#3b82f6" },
-  { id: "green", label: "Green", emoji: "\u{1F7E2}", hex: "#22c55e" },
-  { id: "purple", label: "Purple", emoji: "\u{1F7E3}", hex: "#a855f7" },
+  { id: "red", label: "Red", emoji: "\u{1F534}", hex: "#ff3b5c" },
+  { id: "blue", label: "Blue", emoji: "\u{1F535}", hex: "#3aa8ff" },
+  { id: "green", label: "Green", emoji: "\u{1F7E2}", hex: "#33e08a" },
+  { id: "purple", label: "Purple", emoji: "\u{1F7E3}", hex: "#c162ff" },
 ];
 
 const MEDALS = ["\u{1F947}", "\u{1F948}", "\u{1F949}", "4\u{FE0F}\u{20E3}"];
@@ -76,15 +74,19 @@ const state = {
   colorStep: 0,
   draftPicks: [], // array of arrays of {..character, paid}, index = playerNumber-1
   budgets: [], // index = playerNumber-1, CHF remaining
-  round: 0, // 1-indexed, up to totalRounds
+  round: 0, // 1-indexed, up to totalRounds (display only — see TEAM_SIZE note above)
   totalRounds: 0, // playerCount x TEAM_SIZE, total characters sold this game
   draftedIds: new Set(), // character ids already auctioned off this game
   currentCharacter: null, // character object drawn for the active round
-  phase: null, // "drawing" | "bidding" | "reveal" | "winner"
-  activeBidders: [], // player numbers participating in the current auction (full field, or tied subset during a tiebreak)
-  pendingBidders: [], // subset of activeBidders still to submit a bid
-  bids: {}, // playerNum -> CHF amount, for the current auction
-  isTiebreak: false,
+  phase: null, // "drawing" | "opening" | "bidding" | "freeChoice" | "winner"
+  starterPointer: 0, // 0-indexed into 1..playerCount — who opens the next auction
+  pointerAdvanceRef: null, // playerNum the starterPointer should advance past once this round resolves
+  auctionOrder: [], // player numbers still live in the current alternating auction, in turn order
+  turnIndex: 0, // index into auctionOrder for whose turn it is to respond
+  currentBid: 0,
+  currentBidder: null, // playerNum who placed currentBid
+  freeChoicePlayer: null, // the sole monied player, when everyone else in the auction is broke
+  freeChoiceGiveTarget: null, // who they can hand the character to for free instead
   roundWinner: null, // { playerNum, amount } once resolved
   matchSeed: null,
   results: null, // computed on entering results
@@ -103,10 +105,14 @@ function resetGame() {
   state.draftedIds = new Set();
   state.currentCharacter = null;
   state.phase = null;
-  state.activeBidders = [];
-  state.pendingBidders = [];
-  state.bids = {};
-  state.isTiebreak = false;
+  state.starterPointer = 0;
+  state.pointerAdvanceRef = null;
+  state.auctionOrder = [];
+  state.turnIndex = 0;
+  state.currentBid = 0;
+  state.currentBidder = null;
+  state.freeChoicePlayer = null;
+  state.freeChoiceGiveTarget = null;
   state.roundWinner = null;
   state.matchSeed = null;
   state.results = null;
@@ -180,7 +186,8 @@ function renderFranchiseScreen() {
   return `
     <div class="screen">
       <div class="title">TIER LIST TOURNAMENT</div>
-      <div class="subtitle">Draft a team, simulate the battle, crown a champion.</div>
+      <div class="battle-tag" style="margin-top:0;">⚡ FIGHT FOR THE ROSTER ⚡</div>
+      <div class="subtitle">Bid, battle, and crown a champion.</div>
       <div class="section-label">Choose Universe</div>
       <div class="card-grid">${cards}</div>
     </div>`;
@@ -247,22 +254,29 @@ function renderColorScreen() {
 }
 
 /* ---------------------------------------------------------------------
- * Screen: draft (random-draw blind auction)
+ * Screen: draft (alternating open-outcry auction)
  *
- * THE GAME CHOOSES THE CHARACTER. THE PLAYERS CHOOSE THE BID.
- * Players never pick from a roster — each round the game draws one random
- * character from those not yet auctioned, then every player secretly locks
- * in a CHF bid. Highest bid wins the character and pays their bid amount.
+ * THE GAME CHOOSES THE CHARACTER. THE PLAYERS FIGHT OVER THE PRICE.
+ * Each round the game draws one random character and reveals ONLY its
+ * name — no power, tier, or rank, so bids are never stat-informed. A
+ * rotating opener must bid at least 1 CHF; each other player in turn
+ * either TAKEs the standing price (winning immediately), RAISEs it, or
+ * WITHDRAWs from this auction only. Reaching 0 CHF doesn't eliminate a
+ * player — every player must finish with exactly TEAM_SIZE characters,
+ * so broke players still receive characters (for free) once nobody else
+ * is left to bid against them.
  * ------------------------------------------------------------------- */
 
 function renderDraftScreen() {
   switch (state.phase) {
     case "drawing":
       return renderDrawingPhase();
+    case "opening":
+      return renderOpeningPhase();
     case "bidding":
       return renderBiddingPhase();
-    case "reveal":
-      return renderRevealPhase();
+    case "freeChoice":
+      return renderFreeChoicePhase();
     case "winner":
       return renderWinnerPhase();
     default:
@@ -276,25 +290,55 @@ function renderTeamsSidebar(highlightPlayer) {
     const m = colorMeta(state.colorAssign[i]);
     const picks = state.draftPicks[i] || [];
     const isCurrent = num === highlightPlayer;
-    // Auctions can leave a player with more (or fewer) than the target
-    // TEAM_SIZE, since roster size is driven by who wins each round, not
-    // a fixed per-player slot count — so render at least `picks.length` rows.
-    const rows = Array.from({ length: Math.max(TEAM_SIZE, picks.length) }, (_, slot) => {
+    const rows = Array.from({ length: TEAM_SIZE }, (_, slot) => {
       const c = picks[slot];
-      return `<li class="${c ? "filled" : ""}">${c ? `${escapeHtml(c.displayName)} &mdash; ${c.paid} CHF` : "— empty —"}</li>`;
+      return `<li class="${c ? "filled" : ""}">${c ? `&#9679; ${escapeHtml(c.displayName)} &mdash; ${c.paid} CHF` : "&#9675; empty"}</li>`;
     }).join("");
     return `
-      <div class="team-box ${isCurrent ? "current" : ""}">
+      <div class="team-box ${isCurrent ? "current" : ""}" style="--glow-color:${m.hex}">
         <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()} &middot; ${state.budgets[i]} CHF</h4>
         <ul>${rows}</ul>
       </div>`;
   }).join("");
 }
 
+function renderRoundBanner(tag) {
+  const num = String(state.round).padStart(2, "0");
+  const total = String(state.totalRounds).padStart(2, "0");
+  return `
+    <div class="round-banner">
+      <span class="round-banner-tag">ROUND</span>
+      <span class="round-banner-num">${num}</span>
+      <span class="round-banner-total">/ ${total}</span>
+    </div>
+    ${tag ? `<div class="battle-tag">${tag}</div>` : ""}`;
+}
+
+// The character card intentionally shows NAME ONLY (plus an optional
+// version note like "(Prime)" already folded into displayName) — never
+// tier, rank, or power. Those exist purely for the final calculation.
+function renderCharacterCard() {
+  const c = state.currentCharacter;
+  return `
+    <div class="draw-card">
+      <span class="draw-card-tab">CHARACTER</span>
+      <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
+    </div>`;
+}
+
+function renderTurnBanner(playerNum, label) {
+  const m = colorMeta(state.colorAssign[playerNum - 1]);
+  return `
+    <div class="turn-banner" style="--glow-color:${m.hex}">
+      <span class="dot" style="--glow-color:${m.hex}"></span>
+      PLAYER ${playerNum} &mdash; ${m.label.toUpperCase()} ${label}
+    </div>`;
+}
+
 function renderDrawingPhase() {
   return `
     <div class="screen">
-      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      ${renderRoundBanner()}
       <div class="draw-card drawing">
         <div class="draw-card-mark">?</div>
         <div class="draw-card-label">DRAWING CHARACTER<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
@@ -306,87 +350,127 @@ function renderDrawingPhase() {
     </div>`;
 }
 
-function renderBiddingPhase() {
-  const c = state.currentCharacter;
-  const currentBidder = state.pendingBidders[0];
-  const meta = colorMeta(state.colorAssign[currentBidder - 1]);
-  const remaining = state.budgets[currentBidder - 1];
+function quickBidAmounts(minBid, budget) {
+  return QUICK_RAISE_STEPS.map((step) => minBid - 1 + step).filter(
+    (amt, idx, arr) => amt <= budget && arr.indexOf(amt) === idx
+  );
+}
 
-  const tieBanner = state.isTiebreak
-    ? `<div class="tiebreak-banner">TIEBREAKER &mdash; ${state.activeBidders.map((p) => colorMeta(state.colorAssign[p - 1]).label.toUpperCase()).join(" vs ")} must re-bid</div>`
-    : "";
+function renderOpeningPhase() {
+  const opener = state.auctionOrder[0];
+  const remaining = state.budgets[opener - 1];
+  const amounts = quickBidAmounts(1, remaining);
 
-  const track = state.activeBidders
-    .map((p) => {
-      const m = colorMeta(state.colorAssign[p - 1]);
-      const locked = Object.prototype.hasOwnProperty.call(state.bids, p);
-      const cls = locked ? "done" : p === currentBidder ? "active" : "";
-      return `<div class="player-pill ${cls}">${m.emoji} P${p}: ${locked ? "LOCKED ✓" : "BIDDING..."}</div>`;
-    })
+  const quickButtons = amounts
+    .map((amt) => `<button class="btn bid-btn" data-action="placeOpeningBid" data-value="${amt}">${amt}</button>`)
     .join("");
-
-  const quickButtons = QUICK_BID_AMOUNTS.map((amt) => {
-    const disabled = amt > remaining;
-    return `<button class="btn bid-btn" ${disabled ? "disabled" : `data-action="lockBid" data-value="${amt}"`}>${amt}</button>`;
-  }).join("");
 
   return `
     <div class="screen">
-      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
-      ${tieBanner}
-      <div class="draw-card">
-        <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
-        <div class="draw-card-tier">${escapeHtml(c.tierLabel)}</div>
-        <div class="draw-card-power">PWR ${c.stats.power}</div>
-      </div>
-
-      <div class="player-track">${track}</div>
+      ${renderRoundBanner("⚔ BATTLE FOR THE BID!")}
+      ${renderCharacterCard()}
 
       <div class="bidder-panel">
-        <div class="player-chip" style="border-color:${meta.hex}">
-          <span class="dot" style="background:${meta.hex}"></span>
-          PLAYER ${currentBidder} &mdash; ${meta.label.toUpperCase()}, PLACE YOUR BID &middot; ${remaining} CHF remaining
-        </div>
+        ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; ${remaining} CHF`)}
+        <p class="calc-note center">Must bid at least 1 CHF to open the auction.</p>
         <div class="bid-quick-row">
           ${quickButtons}
-          <button class="btn bid-btn all-in" data-action="lockBid" data-value="${remaining}">ALL IN</button>
+          <button class="btn bid-btn all-in" data-action="placeOpeningBid" data-value="${remaining}">ALL IN</button>
         </div>
         <div class="bid-custom-row">
-          <input type="number" id="customBidInput" min="0" max="${remaining}" step="1" placeholder="Custom amount" />
-          <button class="btn secondary" data-action="lockCustomBid">Lock Bid</button>
+          <input type="number" id="customBidInput" min="1" max="${remaining}" step="1" placeholder="Custom amount" />
+          <button class="btn secondary" data-action="placeOpeningBidCustom">Place Bid</button>
         </div>
       </div>
 
       <div class="draft-layout mt-24">
         <div></div>
-        <div class="teams-panel">${renderTeamsSidebar(currentBidder)}</div>
+        <div class="teams-panel">${renderTeamsSidebar(opener)}</div>
       </div>
     </div>`;
 }
 
-function renderRevealPhase() {
-  const c = state.currentCharacter;
-  const rows = state.activeBidders
+function renderBiddingPhase() {
+  const turnPlayer = state.auctionOrder[state.turnIndex];
+  const bidderMeta = colorMeta(state.colorAssign[state.currentBidder - 1]);
+  const remaining = state.budgets[turnPlayer - 1];
+  const minRaise = state.currentBid + 1;
+  const canRaise = remaining >= minRaise;
+  const amounts = canRaise ? quickBidAmounts(minRaise, remaining) : [];
+
+  const track = state.auctionOrder
     .map((p) => {
       const m = colorMeta(state.colorAssign[p - 1]);
-      return `
-      <div class="vs-card" style="border-color:${m.hex}">
-        <div class="name">${m.emoji} PLAYER ${p}</div>
-        <div class="score" style="color:${m.hex}">${state.bids[p]} CHF</div>
-      </div>`;
+      const cls = p === turnPlayer ? "active" : p === state.currentBidder ? "done" : "";
+      const label = p === state.currentBidder ? `HIGH BID ${state.currentBid} CHF` : "in auction";
+      return `<div class="player-pill ${cls}">${m.emoji} P${p}: ${label}</div>`;
     })
     .join("");
 
+  const quickButtons = amounts
+    .map((amt) => `<button class="btn bid-btn" data-action="raiseBid" data-value="${amt}">${amt}</button>`)
+    .join("");
+
+  const raiseControls = canRaise
+    ? `
+      <div class="bid-quick-row">
+        ${quickButtons}
+        <button class="btn bid-btn all-in" data-action="raiseBid" data-value="${remaining}">ALL IN</button>
+      </div>
+      <div class="bid-custom-row">
+        <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Custom amount" />
+        <button class="btn secondary" data-action="raiseBidCustom">Raise</button>
+      </div>`
+    : `<p class="calc-note center">Not enough CHF left to raise.</p>`;
+
   return `
     <div class="screen">
-      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
-      <div class="draw-card">
-        <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
-        <div class="draw-card-tier">${escapeHtml(c.tierLabel)}</div>
-        <div class="draw-card-power">PWR ${c.stats.power}</div>
+      ${renderRoundBanner()}
+      ${renderCharacterCard()}
+
+      <div class="bid-hero">
+        <div class="bid-hero-label">CURRENT BID</div>
+        <div class="bid-hero-amount" style="color:${bidderMeta.hex};background:rgba(0,0,0,0.35);">${state.currentBid} CHF</div>
+        <div class="bid-hero-by">bid by ${bidderMeta.emoji} PLAYER ${state.currentBidder} &mdash; ${bidderMeta.label.toUpperCase()}</div>
       </div>
-      <div class="vs-row">${rows}</div>
-      <div class="btn-row"><button class="btn" data-action="continueReveal">Reveal Bids</button></div>
+
+      <div class="player-track">${track}</div>
+
+      <div class="bidder-panel">
+        ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; ${remaining} CHF`)}
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn" data-action="takeBid">TAKE FOR ${state.currentBid} CHF</button>
+          <button class="btn secondary" data-action="withdrawBid">WITHDRAW</button>
+        </div>
+        ${raiseControls}
+      </div>
+
+      <div class="draft-layout mt-24">
+        <div></div>
+        <div class="teams-panel">${renderTeamsSidebar(turnPlayer)}</div>
+      </div>
+    </div>`;
+}
+
+function renderFreeChoicePhase() {
+  const giveMeta = colorMeta(state.colorAssign[state.freeChoiceGiveTarget - 1]);
+
+  return `
+    <div class="screen">
+      ${renderRoundBanner()}
+      ${renderCharacterCard()}
+      <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any CHF left — no one to bid against.</p>
+      <div class="bidder-panel">
+        ${renderTurnBanner(state.freeChoicePlayer, "&mdash; YOUR CHOICE")}
+        <div class="btn-row" style="margin-top:14px;">
+          <button class="btn" data-action="freeChoiceTake">TAKE FOR 0 CHF</button>
+          <button class="btn secondary" data-action="freeChoiceGive">GIVE TO ${giveMeta.label.toUpperCase()}</button>
+        </div>
+      </div>
+      <div class="draft-layout mt-24">
+        <div></div>
+        <div class="teams-panel">${renderTeamsSidebar(state.freeChoicePlayer)}</div>
+      </div>
     </div>`;
 }
 
@@ -394,11 +478,12 @@ function renderWinnerPhase() {
   const c = state.currentCharacter;
   const { playerNum, amount } = state.roundWinner;
   const m = colorMeta(state.colorAssign[playerNum - 1]);
-  const isLastRound = state.round >= state.totalRounds;
+  const needing = playersNeedingCharacters();
+  const isLastRound = needing.length === 0;
 
   return `
     <div class="screen">
-      <div class="section-label">ROUND ${state.round} / ${state.totalRounds}</div>
+      ${renderRoundBanner()}
       <div class="winner-banner" style="color:${m.hex}">${m.emoji} ${m.label.toUpperCase()} WINS!</div>
       <div class="center" style="margin-bottom:20px;">
         <strong>${escapeHtml(c.displayName)}</strong> joined ${m.label.toUpperCase()} for ${amount} CHF
@@ -417,86 +502,151 @@ function renderWinnerPhase() {
  * Draft / auction logic
  * ------------------------------------------------------------------- */
 
+function playersNeedingCharacters() {
+  return Array.from({ length: state.playerCount }, (_, i) => i + 1).filter(
+    (p) => state.draftPicks[p - 1].length < TEAM_SIZE
+  );
+}
+
+// Rotate the full 1..N player list so it starts right after starterPointer,
+// then keep only players who still need a character.
+function rotatedNeedingOrder(needing) {
+  const n = state.playerCount;
+  const ordered = [];
+  for (let i = 0; i < n; i++) {
+    ordered.push(((state.starterPointer + i) % n) + 1);
+  }
+  return ordered.filter((p) => needing.includes(p));
+}
+
 function startRound() {
   const franchiseData = state.db.franchises.find((f) => f.id === state.franchise);
   const pool = franchiseData.characters.filter((c) => !state.draftedIds.has(c.id));
   const randomIndex = Math.floor(Math.random() * pool.length);
   state.currentCharacter = pool[randomIndex];
-
   state.phase = "drawing";
-  state.isTiebreak = false;
-  state.activeBidders = Array.from({ length: state.playerCount }, (_, i) => i + 1);
-  state.pendingBidders = [...state.activeBidders];
-  state.bids = {};
   state.roundWinner = null;
   render();
 
   setTimeout(() => {
     if (state.phase === "drawing") {
-      state.phase = "bidding";
-      render();
+      beginAuction();
     }
   }, DRAW_ANIMATION_MS);
 }
 
-function lockBid(playerNum, rawAmount) {
-  const remaining = state.budgets[playerNum - 1];
-  const amount = clamp(Math.round(rawAmount) || 0, 0, remaining);
-  state.bids[playerNum] = amount;
-  state.pendingBidders = state.pendingBidders.filter((p) => p !== playerNum);
-  if (state.pendingBidders.length === 0) {
-    state.phase = "reveal";
+function beginAuction() {
+  const needing = playersNeedingCharacters();
+  const ordered = rotatedNeedingOrder(needing);
+  state.pointerAdvanceRef = ordered[0];
+
+  if (ordered.length === 1) {
+    // Only one player still needs a character — nobody to bid against.
+    resolveRoundWinner(ordered[0], 0);
+    return;
   }
+
+  const monied = ordered.filter((p) => state.budgets[p - 1] > 0);
+
+  if (monied.length === 0) {
+    // Everyone still in the running is broke — hand it over via turn order.
+    resolveRoundWinner(ordered[0], 0);
+    return;
+  }
+
+  if (monied.length === 1) {
+    state.phase = "freeChoice";
+    state.freeChoicePlayer = monied[0];
+    state.freeChoiceGiveTarget = ordered.find((p) => p !== monied[0]);
+    render();
+    return;
+  }
+
+  state.auctionOrder = monied;
+  state.turnIndex = 0;
+  state.currentBid = 0;
+  state.currentBidder = null;
+  state.phase = "opening";
   render();
 }
 
-function resolveWinner() {
-  const amounts = state.activeBidders.map((p) => ({ p, amt: state.bids[p] }));
-  const max = Math.max(...amounts.map((a) => a.amt));
-  const winners = amounts.filter((a) => a.amt === max).map((a) => a.p);
+function placeOpeningBid(rawAmount) {
+  const opener = state.auctionOrder[0];
+  const budget = state.budgets[opener - 1];
+  const amount = clamp(Math.round(rawAmount) || 0, 1, budget);
+  state.currentBid = amount;
+  state.currentBidder = opener;
+  state.turnIndex = state.auctionOrder.length > 1 ? 1 : 0;
+  advanceToValidTurnOrResolve();
+}
 
-  if (winners.length === 1) {
-    finalizeWinner(winners[0], max);
+function raiseBid(rawAmount) {
+  const player = state.auctionOrder[state.turnIndex];
+  const budget = state.budgets[player - 1];
+  const amount = clamp(Math.round(rawAmount) || 0, state.currentBid + 1, budget);
+  state.currentBid = amount;
+  state.currentBidder = player;
+  state.turnIndex = (state.turnIndex + 1) % state.auctionOrder.length;
+  advanceToValidTurnOrResolve();
+}
+
+function takeBid() {
+  const player = state.auctionOrder[state.turnIndex];
+  resolveRoundWinner(player, state.currentBid);
+}
+
+function withdrawBid() {
+  state.auctionOrder.splice(state.turnIndex, 1);
+  if (state.auctionOrder.length === 1) {
+    resolveRoundWinner(state.auctionOrder[0], state.currentBid);
     return;
   }
+  state.turnIndex = state.turnIndex % state.auctionOrder.length;
+  advanceToValidTurnOrResolve();
+}
 
-  // Tie: if none of the tied players could possibly raise their bid
-  // (already at their full remaining budget), further tiebreak rounds
-  // can't resolve it — pick randomly among them instead of looping forever.
-  const canAnyoneRaise = winners.some((p) => state.budgets[p - 1] > max);
-  if (!canAnyoneRaise) {
-    const randomWinner = winners[Math.floor(Math.random() * winners.length)];
-    finalizeWinner(randomWinner, max);
+// After a raise or withdrawal, step forward until we land on a player who
+// can actually afford the current bid, or resolve if only one is left.
+function advanceToValidTurnOrResolve() {
+  if (state.auctionOrder.length === 1) {
+    resolveRoundWinner(state.auctionOrder[0], state.currentBid);
     return;
   }
-
-  state.isTiebreak = true;
-  state.activeBidders = winners;
-  state.pendingBidders = [...winners];
-  state.bids = {};
+  const player = state.auctionOrder[state.turnIndex];
+  if (state.budgets[player - 1] < state.currentBid) {
+    state.auctionOrder.splice(state.turnIndex, 1);
+    state.turnIndex = state.turnIndex % state.auctionOrder.length;
+    advanceToValidTurnOrResolve();
+    return;
+  }
   state.phase = "bidding";
   render();
 }
 
-function finalizeWinner(playerNum, amount) {
+function resolveRoundWinner(playerNum, amount) {
   state.budgets[playerNum - 1] -= amount;
   state.draftPicks[playerNum - 1].push({ ...state.currentCharacter, paid: amount });
   state.draftedIds.add(state.currentCharacter.id);
+
+  const refIdx = state.pointerAdvanceRef - 1;
+  state.starterPointer = (refIdx + 1) % state.playerCount;
+
   state.roundWinner = { playerNum, amount };
   state.phase = "winner";
   render();
 }
 
 function advanceRound() {
-  state.round++;
-  if (state.round > state.totalRounds) {
+  const needing = playersNeedingCharacters();
+  if (needing.length === 0) {
     state.screen = "vs";
     state.matchSeed = Math.floor(seededUnit(draftSeedKey()) * 1e9);
     computeResults();
     render();
-  } else {
-    startRound();
+    return;
   }
+  state.round++;
+  startRound();
 }
 
 /* ---------------------------------------------------------------------
@@ -582,7 +732,7 @@ function renderResultsScreen() {
 
       <div class="ranking-list">${rankingHtml}</div>
 
-      <div class="winner-banner">\u{1F3C6} ${winnerMeta.label.toUpperCase()} WINS</div>
+      <div class="winner-banner" style="color:${winnerMeta.hex}">\u{1F3C6} ${winnerMeta.label.toUpperCase()} WINS!!</div>
 
       <div class="section-label" style="margin-top:36px;">Team Comparison</div>
       <div class="teams-detail">${detailCards}</div>
@@ -793,6 +943,7 @@ function bindEvents() {
           state.draftedIds = new Set();
           state.totalRounds = state.playerCount * TEAM_SIZE;
           state.round = 1;
+          state.starterPointer = Math.floor(Math.random() * state.playerCount);
           state.screen = "draft";
           startRound();
           return;
@@ -800,23 +951,44 @@ function bindEvents() {
         render();
         break;
 
-      case "lockBid": {
-        const currentBidder = state.pendingBidders[0];
-        lockBid(currentBidder, parseInt(value, 10));
+      case "placeOpeningBid":
+        placeOpeningBid(parseInt(value, 10));
         break;
-      }
 
-      case "lockCustomBid": {
-        const currentBidder = state.pendingBidders[0];
+      case "placeOpeningBidCustom": {
         const input = document.getElementById("customBidInput");
         const amount = input ? parseInt(input.value, 10) : NaN;
         if (Number.isNaN(amount)) break;
-        lockBid(currentBidder, amount);
+        placeOpeningBid(amount);
         break;
       }
 
-      case "continueReveal":
-        resolveWinner();
+      case "raiseBid":
+        raiseBid(parseInt(value, 10));
+        break;
+
+      case "raiseBidCustom": {
+        const input = document.getElementById("customBidInput");
+        const amount = input ? parseInt(input.value, 10) : NaN;
+        if (Number.isNaN(amount)) break;
+        raiseBid(amount);
+        break;
+      }
+
+      case "takeBid":
+        takeBid();
+        break;
+
+      case "withdrawBid":
+        withdrawBid();
+        break;
+
+      case "freeChoiceTake":
+        resolveRoundWinner(state.freeChoicePlayer, 0);
+        break;
+
+      case "freeChoiceGive":
+        resolveRoundWinner(state.freeChoiceGiveTarget, 0);
         break;
 
       case "nextCharacter":

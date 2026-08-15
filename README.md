@@ -1,28 +1,35 @@
 # Tier List Tournament
 
 A 2–4 player auction-draft battle game built from the Naruto and One Piece
-tier-list spreadsheets in this repo. Pick a universe, then bid CHF against
-the other players for characters the game draws at random — you never pick
+tier-list spreadsheets in this repo. Pick a universe, then fight the other
+players over CHF for characters the game draws at random — you never pick
 a character directly, only how much you're willing to pay for the one it
-shows you. See a fully transparent, reproducible score decide the winner.
+shows you, and only its name is revealed (no stats) while you're bidding.
+See a fully transparent, reproducible score decide the winner.
 
 ## How the draft works
 
-The game — not the player — chooses each character:
+The game — not the player — chooses each character, and players fight over
+the price in a live, alternating (English-style) auction, not a blind
+simultaneous bid:
 
-1. The game randomly draws one character not yet auctioned.
-2. Every player privately locks in a CHF bid (hot-seat: pass the device
-   between players, or read bids aloud for a live/on-stream session).
-3. Bids are revealed. Highest bid wins and pays that amount; ties trigger
-   a re-bid among just the tied players.
-4. The winner's remaining budget drops by what they paid, and the
-   character joins their team.
-5. Repeat until `players × 3` characters have been auctioned off in total.
+1. The game randomly draws one character not yet auctioned and reveals
+   only its name — no power, tier, or rank, so bids are never stat-informed.
+2. Who opens the bidding rotates every round (randomized at game start),
+   skipping anyone who's out of CHF. The opener must bid at least 1 CHF.
+3. Turn passes to the next player, who either **TAKEs** the standing price
+   (winning immediately), **RAISEs** it, or **WITHDRAWs** from this auction
+   only (they stay in the game). Play continues until someone takes, or
+   everyone else has withdrawn and the last bidder standing wins by default.
+4. The winner's budget drops by what they paid, and the character joins
+   their team.
+5. Repeat until every player has exactly 3 characters.
 
-Because every round has exactly one winner, team sizes aren't fixed slots —
-a player who bids aggressively (or goes all-in early) can end up with more
-or fewer characters than everyone else. Scoring accounts for this: every
-average is computed over however many members a team actually has.
+Reaching 0 CHF doesn't eliminate a player — they just can't outbid anyone.
+If every remaining opponent in a round is also broke, the character is
+handed out for free via turn order; if exactly one player still has money,
+that player gets a simplified choice (take it free, or hand it to whoever's
+next) instead of bidding against nobody.
 
 ## Play locally
 
@@ -61,9 +68,9 @@ Every number shown on the results screen is derived, never hidden:
 
 1. **Character stats** — from tier-list rank (Character Power) and a
    name-seeded deterministic spread (Speed, Durability, Hax, Battle IQ).
-2. **Team averages** — each stat averaged across however many characters
-   that team actually won (team-size normalization; auction-won rosters
-   aren't fixed-size).
+2. **Team averages** — each stat averaged across the team's 3 members
+   (team-size normalization). Stats stay hidden during the draft itself —
+   they only come into play here, for the final calculation.
 3. **Core Score** — weighted sum of the five team averages (weights shown
    in-app: Power 30%, Speed 20%, Durability 20%, Hax 15%, Battle IQ 15%).
 4. **Teamwork** — `100 − 2 × stddev(member Power)`; tighter power levels
