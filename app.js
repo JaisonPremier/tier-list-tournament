@@ -11,11 +11,14 @@ const TEAM_SIZE = 3;
 const STARTING_BUDGET = 20; // yen (¥)
 const DRAW_ANIMATION_MS = 800;
 
-const COLORS = [
-  { id: "red", label: "Red", emoji: "\u{1F534}", hex: "#ff3b5c" },
-  { id: "blue", label: "Blue", emoji: "\u{1F535}", hex: "#3aa8ff" },
-  { id: "green", label: "Green", emoji: "\u{1F7E2}", hex: "#33e08a" },
-  { id: "purple", label: "Purple", emoji: "\u{1F7E3}", hex: "#c162ff" },
+// Player identity is now an avatar portrait, not a color name. Each avatar
+// carries one accent color (eyeballed from the artwork) used sparingly as a
+// decorative highlight — never as the primary way to tell players apart.
+const AVATARS = [
+  { id: "avatar-01", image: "avatars/avatar-01.png", accent: "#ffab2e" },
+  { id: "avatar-02", image: "avatars/avatar-02.png", accent: "#3aa8ff" },
+  { id: "avatar-03", image: "avatars/avatar-03.png", accent: "#b06bff" },
+  { id: "avatar-04", image: "avatars/avatar-04.png", accent: "#33e0a0" },
 ];
 
 const MEDALS = ["\u{1F947}", "\u{1F948}", "\u{1F949}", "4\u{FE0F}\u{20E3}"];
@@ -35,6 +38,13 @@ const STAT_LABELS = {
   hax: "Hax",
   battleIQ: "Battle IQ",
 };
+
+// No portrait artwork exists for the ~166 auctioned Naruto/One Piece
+// characters (only the 4 player avatars are real assets) — so instead of
+// faking or scraping character art, each drawn character gets a
+// deterministic accent color from this curated palette, giving the reveal
+// screen a "reacts to the character" feel without needing an image.
+const CHARACTER_ACCENTS = ["#ff6b6b", "#ffab2e", "#f4d35e", "#33e0a0", "#3aa8ff", "#8f7bff", "#e06bcf"];
 
 /* ---------------------------------------------------------------------
  * Deterministic seeded RNG (mirrors generate_data.py's seeded_unit)
@@ -60,6 +70,11 @@ function round1(n) {
   return Math.round(n * 10) / 10;
 }
 
+function characterAccent(character) {
+  const idx = Math.floor(seededUnit(`accent::${character.id}`) * CHARACTER_ACCENTS.length);
+  return CHARACTER_ACCENTS[idx];
+}
+
 /* ---------------------------------------------------------------------
  * Game state
  * ------------------------------------------------------------------- */
@@ -69,8 +84,9 @@ const state = {
   db: null,
   franchise: null,
   playerCount: null,
-  colorAssign: [], // index = playerNumber-1, value = color id
-  colorStep: 0,
+  avatarAssign: [], // index = playerNumber-1, value = avatar id
+  avatarStep: 0,
+  avatarHighlight: null, // avatar id currently previewed on the selection screen
   draftPicks: [], // array of arrays of {..character, paid}, index = playerNumber-1
   budgets: [], // index = playerNumber-1, yen (¥) remaining
   round: 0, // 1-indexed, up to totalRounds (display only — see TEAM_SIZE note above)
@@ -96,8 +112,9 @@ const state = {
 function resetGame() {
   state.franchise = null;
   state.playerCount = null;
-  state.colorAssign = [];
-  state.colorStep = 0;
+  state.avatarAssign = [];
+  state.avatarStep = 0;
+  state.avatarHighlight = null;
   state.draftPicks = [];
   state.budgets = [];
   state.round = 0;
@@ -152,8 +169,8 @@ function render() {
     case "playerCount":
       app.innerHTML = renderPlayerCountScreen();
       break;
-    case "color":
-      app.innerHTML = renderColorScreen();
+    case "avatar":
+      app.innerHTML = renderAvatarScreen();
       break;
     case "draft":
       app.innerHTML = renderDraftScreen();
@@ -169,28 +186,28 @@ function render() {
 }
 
 /* ---------------------------------------------------------------------
- * Screen: franchise select
+ * Screen: home / universe select
  * ------------------------------------------------------------------- */
 
 function renderFranchiseScreen() {
   const cards = state.db.franchises
     .map(
       (fr) => `
-      <div class="big-choice" data-action="pickFranchise" data-value="${fr.id}">
-        <span class="emoji">${fr.id === "naruto" ? "\u{1F32A}\u{FE0F}" : "\u{1F3F4}\u{200D}\u{2620}\u{FE0F}"}</span>
-        ${fr.label.toUpperCase()}
-        <div style="font-weight:400;font-size:0.8rem;color:var(--text-dim);margin-top:6px;">${fr.count} characters</div>
+      <div class="world-card" data-action="pickFranchise" data-value="${fr.id}">
+        <span class="world-card-emoji">${fr.id === "naruto" ? "\u{1F32A}\u{FE0F}" : "\u{1F3F4}\u{200D}\u{2620}\u{FE0F}"}</span>
+        <div class="world-card-name">${fr.label}</div>
+        <div class="world-card-meta">${fr.count} characters</div>
       </div>`
     )
     .join("");
 
   return `
-    <div class="screen">
-      <div class="title">TIER LIST TOURNAMENT</div>
-      <div class="battle-tag" style="margin-top:0;">⚡ FIGHT FOR THE ROSTER ⚡</div>
-      <div class="subtitle">Bid, battle, and crown a champion.</div>
-      <div class="section-label">Choose Universe</div>
-      <div class="card-grid">${cards}</div>
+    <div class="screen home-screen">
+      <div class="brand-mark">manga draft arena</div>
+      <div class="title serif-em">Manga Draft Arena</div>
+      <div class="subtitle">Choose your world. Fight for the roster. Build a legend.</div>
+      <div class="section-label">Select Universe</div>
+      <div class="world-grid">${cards}</div>
     </div>`;
 }
 
@@ -202,55 +219,63 @@ function renderPlayerCountScreen() {
   const options = [2, 3, 4]
     .map(
       (n) => `
-      <div class="big-choice" data-action="pickCount" data-value="${n}">
-        [ ${n} PLAYERS ]
-        <div style="font-weight:400;font-size:0.8rem;color:var(--text-dim);margin-top:8px;">
-          ${Array.from({ length: n }, (_, i) => `Player ${i + 1}`).join(" &middot; ")}
-        </div>
+      <div class="lobby-choice" data-action="pickCount" data-value="${n}">
+        <div class="lobby-choice-num">${n}</div>
+        <div class="lobby-choice-label">Players</div>
       </div>`
     )
     .join("");
 
   return `
     <div class="screen">
-      <div class="title">NUMBER OF PLAYERS</div>
-      <div class="subtitle">Universe: ${franchiseLabel()}</div>
-      <div class="card-grid">${options}</div>
-      <div class="btn-row"><button class="btn secondary" data-action="back-franchise">Back</button></div>
+      <div class="section-label">${franchiseLabel()}</div>
+      <div class="title">Number of Players</div>
+      <div class="lobby-grid">${options}</div>
+      <div class="btn-row"><button class="btn ghost" data-action="back-franchise">Back</button></div>
     </div>`;
 }
 
 /* ---------------------------------------------------------------------
- * Screen: color select (sequential per player)
+ * Screen: avatar select (sequential per player) — a gacha-style
+ * character-selection composition, not a color swatch grid.
  * ------------------------------------------------------------------- */
 
-function renderColorScreen() {
-  const playerNum = state.colorStep + 1;
-  const taken = new Set(state.colorAssign);
+function renderAvatarScreen() {
+  const playerNum = state.avatarStep + 1;
+  const taken = new Set(state.avatarAssign);
+  const highlighted = state.avatarHighlight && !taken.has(state.avatarHighlight)
+    ? state.avatarHighlight
+    : AVATARS.find((a) => !taken.has(a.id)).id;
+  const featured = AVATARS.find((a) => a.id === highlighted);
 
-  const swatches = COLORS.map((c) => {
-    const isTaken = taken.has(c.id);
+  const thumbs = AVATARS.map((a) => {
+    const isTaken = taken.has(a.id);
+    const isActive = a.id === highlighted;
     return `
-      <div class="color-choice ${isTaken ? "taken" : ""}" ${isTaken ? "" : `data-action="pickColor" data-value="${c.id}"`}>
-        <span class="swatch" style="background:${c.hex}"></span>
-        ${c.emoji} ${c.label}
+      <div class="avatar-thumb ${isTaken ? "taken" : ""} ${isActive ? "active" : ""}"
+           style="--accent:${a.accent}"
+           ${isTaken ? "" : `data-action="highlightAvatar" data-value="${a.id}"`}>
+        <img src="${a.image}" alt="" loading="lazy" />
+        ${isTaken ? '<span class="avatar-thumb-taken">TAKEN</span>' : ""}
       </div>`;
   }).join("");
 
   const track = Array.from({ length: state.playerCount }, (_, i) => {
-    const num = i + 1;
-    const cls = i < state.colorStep ? "done" : i === state.colorStep ? "active" : "";
-    const assigned = state.colorAssign[i];
-    const label = assigned ? colorMeta(assigned).label : "?";
-    return `<div class="player-pill ${cls}">P${num}: ${label}</div>`;
+    const cls = i < state.avatarStep ? "done" : i === state.avatarStep ? "active" : "";
+    return `<div class="player-pip ${cls}">P${i + 1}</div>`;
   }).join("");
 
   return `
-    <div class="screen">
-      <div class="title">PLAYER ${playerNum}</div>
-      <div class="subtitle">Choose color</div>
-      <div class="player-track">${track}</div>
-      <div class="color-grid">${swatches}</div>
+    <div class="screen avatar-screen">
+      <div class="player-pip-row">${track}</div>
+      <div class="section-label">Player ${playerNum} &mdash; Select Avatar</div>
+      <div class="avatar-stage" style="--accent:${featured.accent}">
+        <img class="avatar-stage-img" src="${featured.image}" alt="" />
+      </div>
+      <div class="avatar-thumb-row">${thumbs}</div>
+      <div class="btn-row">
+        <button class="btn" data-action="confirmAvatar" data-value="${featured.id}">Confirm</button>
+      </div>
     </div>`;
 }
 
@@ -293,7 +318,7 @@ function renderDraftScreen() {
   return `
     ${phaseHtml}
     <div class="restart-footer">
-      <button class="btn secondary" data-action="requestRestart">&#8634; Restart Game</button>
+      <button class="btn ghost" data-action="requestRestart">&#8634; Restart Game</button>
     </div>
     ${state.showRestartConfirm ? renderRestartConfirm() : ""}`;
 }
@@ -306,26 +331,35 @@ function renderRestartConfirm() {
         <p class="calc-note" style="font-size:0.9rem;">This game's progress will be lost and you'll go back to universe select.</p>
         <div class="btn-row">
           <button class="btn" data-action="confirmRestartYes">Yes, Start Over</button>
-          <button class="btn secondary" data-action="cancelRestart">No, Continue</button>
+          <button class="btn ghost" data-action="cancelRestart">No, Continue</button>
         </div>
       </div>
     </div>`;
 }
 
+// Compact avatar-first HUD: portrait, PLAYER N, budget, and diamond pips for
+// the 3 team slots. Acquired characters show as a name chip, not a portrait
+// (none exists) — but never a bare "empty" x3 list.
 function renderTeamsSidebar(highlightPlayer) {
   return Array.from({ length: state.playerCount }, (_, i) => {
     const num = i + 1;
-    const m = colorMeta(state.colorAssign[i]);
+    const av = avatarMeta(state.avatarAssign[i]);
     const picks = state.draftPicks[i] || [];
     const isCurrent = num === highlightPlayer;
-    const rows = Array.from({ length: TEAM_SIZE }, (_, slot) => {
+    const pips = Array.from({ length: TEAM_SIZE }, (_, slot) => {
       const c = picks[slot];
-      return `<li class="${c ? "filled" : ""}">${c ? `&#9679; ${escapeHtml(c.displayName)} &mdash; &yen;${c.paid}` : "&#9675; empty"}</li>`;
+      return c
+        ? `<span class="pip filled" title="${escapeHtml(c.displayName)} — &yen;${c.paid}">${escapeHtml(c.name)}</span>`
+        : `<span class="pip empty">&#9671;</span>`;
     }).join("");
     return `
-      <div class="team-box ${isCurrent ? "current" : ""}" style="--glow-color:${m.hex}">
-        <h4><span class="dot" style="background:${m.hex}"></span>Player ${num} &mdash; ${m.label.toUpperCase()} &middot; &yen;${state.budgets[i]}</h4>
-        <ul>${rows}</ul>
+      <div class="hud-card ${isCurrent ? "current" : ""}" style="--accent:${av.accent}">
+        <img class="hud-avatar" src="${av.image}" alt="" />
+        <div class="hud-info">
+          <div class="hud-name">Player ${num}</div>
+          <div class="hud-budget">&yen;${state.budgets[i]}</div>
+          <div class="hud-team">${pips}</div>
+        </div>
       </div>`;
   }).join("");
 }
@@ -335,9 +369,8 @@ function renderRoundBanner(tag) {
   const total = String(state.totalRounds).padStart(2, "0");
   return `
     <div class="round-banner">
-      <span class="round-banner-tag">ROUND</span>
-      <span class="round-banner-num">${num}</span>
-      <span class="round-banner-total">/ ${total}</span>
+      <span class="round-banner-eyebrow">Round</span>
+      <span class="round-banner-num">${num}<span class="round-banner-total">/${total}</span></span>
     </div>
     ${tag ? `<div class="battle-tag">${tag}</div>` : ""}`;
 }
@@ -345,21 +378,27 @@ function renderRoundBanner(tag) {
 // The character card intentionally shows NAME ONLY (plus an optional
 // version note like "(Prime)" already folded into displayName) — never
 // tier, rank, or power. Those exist purely for the final calculation.
+// No portrait art exists for auctioned characters, so the name itself,
+// rendered enormous, IS the artwork — with a per-character accent wash.
 function renderCharacterCard() {
   const c = state.currentCharacter;
+  const accent = characterAccent(c);
   return `
-    <div class="draw-card">
-      <span class="draw-card-tab">CHARACTER</span>
-      <div class="draw-card-name">${escapeHtml(c.displayName)}</div>
+    <div class="reveal-stage" style="--accent:${accent}">
+      <div class="reveal-eyebrow">Character</div>
+      <div class="reveal-name">${escapeHtml(c.displayName)}</div>
     </div>`;
 }
 
 function renderTurnBanner(playerNum, label) {
-  const m = colorMeta(state.colorAssign[playerNum - 1]);
+  const av = avatarMeta(state.avatarAssign[playerNum - 1]);
   return `
-    <div class="turn-banner" style="--glow-color:${m.hex}">
-      <span class="dot" style="--glow-color:${m.hex}"></span>
-      PLAYER ${playerNum} &mdash; ${m.label.toUpperCase()} ${label}
+    <div class="turn-banner" style="--accent:${av.accent}">
+      <img class="turn-banner-avatar" src="${av.image}" alt="" />
+      <div class="turn-banner-text">
+        <div class="turn-banner-player">Player ${playerNum}</div>
+        <div class="turn-banner-label">${label}</div>
+      </div>
     </div>`;
 }
 
@@ -367,9 +406,9 @@ function renderDrawingPhase() {
   return `
     <div class="screen">
       ${renderRoundBanner()}
-      <div class="draw-card drawing">
-        <div class="draw-card-mark">?</div>
-        <div class="draw-card-label">DRAWING CHARACTER<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
+      <div class="reveal-stage drawing">
+        <div class="reveal-mark">&#8943;</div>
+        <div class="reveal-eyebrow">Drawing Character<span class="dots"><span>.</span><span>.</span><span>.</span></span></div>
       </div>
       <div class="draft-layout">
         <div></div>
@@ -387,8 +426,8 @@ function renderBidAmountGrid(minBid, budget) {
     const available = amt >= minBid && amt <= budget;
     buttons.push(
       available
-        ? `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`
-        : `<button class="btn bid-btn" disabled>&yen;${amt}</button>`
+        ? `<button class="chip-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`
+        : `<button class="chip-btn" disabled>&yen;${amt}</button>`
     );
   }
   return buttons.join("");
@@ -400,11 +439,11 @@ function renderOpeningPhase() {
 
   return `
     <div class="screen">
-      ${renderRoundBanner("⚔ BATTLE FOR THE BID!")}
+      ${renderRoundBanner("Opening Bid")}
       ${renderCharacterCard()}
 
       <div class="bidder-panel">
-        ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; &yen;${remaining}`)}
+        ${renderTurnBanner(opener, `Opening bid &middot; &yen;${remaining} available`)}
         <p class="calc-note center">Must bid at least &yen;1 to open the auction. Pick an amount, then confirm.</p>
         <div class="bid-quick-row">
           ${renderBidAmountGrid(1, remaining)}
@@ -424,7 +463,7 @@ function renderOpeningPhase() {
 
 function renderBiddingPhase() {
   const turnPlayer = state.auctionOrder[state.turnIndex];
-  const bidderMeta = colorMeta(state.colorAssign[state.currentBidder - 1]);
+  const bidderAv = avatarMeta(state.avatarAssign[state.currentBidder - 1]);
   const remaining = state.budgets[turnPlayer - 1];
   const minRaise = state.currentBid + 1;
   const canRaise = remaining >= minRaise;
@@ -449,14 +488,15 @@ function renderBiddingPhase() {
       ${renderCharacterCard()}
 
       <div class="bid-hero">
-        <div class="bid-hero-label">CURRENT BID</div>
-        <div class="bid-hero-amount" style="color:${bidderMeta.hex};background:rgba(0,0,0,0.35);">&yen;${state.currentBid}</div>
+        <div class="bid-hero-label">Current Bid</div>
+        <div class="bid-hero-amount" style="--accent:${bidderAv.accent}">&yen;${state.currentBid}</div>
+        <img class="bid-hero-avatar" src="${bidderAv.image}" alt="" />
       </div>
 
       <div class="bidder-panel">
-        ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; &yen;${remaining}`)}
+        ${renderTurnBanner(turnPlayer, `Your turn &middot; &yen;${remaining} available`)}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn secondary" data-action="withdrawBid">WITHDRAW &mdash; let them have it for &yen;${state.currentBid}</button>
+          <button class="btn ghost" data-action="withdrawBid">Withdraw &mdash; let them have it for &yen;${state.currentBid}</button>
         </div>
         ${raiseControls}
       </div>
@@ -469,7 +509,7 @@ function renderBiddingPhase() {
 }
 
 function renderFreeChoicePhase() {
-  const giveMeta = colorMeta(state.colorAssign[state.freeChoiceGiveTarget - 1]);
+  const giveAv = avatarMeta(state.avatarAssign[state.freeChoiceGiveTarget - 1]);
 
   return `
     <div class="screen">
@@ -477,10 +517,10 @@ function renderFreeChoicePhase() {
       ${renderCharacterCard()}
       <p class="calc-note center" style="margin-bottom:16px;">Nobody else in this auction has any &yen; left — no one to bid against.</p>
       <div class="bidder-panel">
-        ${renderTurnBanner(state.freeChoicePlayer, "&mdash; YOUR CHOICE")}
+        ${renderTurnBanner(state.freeChoicePlayer, "Your choice")}
         <div class="btn-row" style="margin-top:14px;">
-          <button class="btn" data-action="freeChoiceTake">TAKE FOR &yen;0</button>
-          <button class="btn secondary" data-action="freeChoiceGive">GIVE TO ${giveMeta.label.toUpperCase()}</button>
+          <button class="btn" data-action="freeChoiceTake">Take for &yen;0</button>
+          <button class="btn ghost" data-action="freeChoiceGive">Give to Player ${state.freeChoiceGiveTarget}</button>
         </div>
       </div>
       <div class="draft-layout mt-24">
@@ -493,16 +533,20 @@ function renderFreeChoicePhase() {
 function renderWinnerPhase() {
   const c = state.currentCharacter;
   const { playerNum, amount } = state.roundWinner;
-  const m = colorMeta(state.colorAssign[playerNum - 1]);
+  const av = avatarMeta(state.avatarAssign[playerNum - 1]);
   const needing = playersNeedingCharacters();
   const isLastRound = needing.length === 0;
 
   return `
     <div class="screen">
       ${renderRoundBanner()}
-      <div class="winner-banner" style="color:${m.hex}">${m.emoji} ${m.label.toUpperCase()} WINS!</div>
-      <div class="center" style="margin-bottom:20px;">
-        <strong>${escapeHtml(c.displayName)}</strong> joined ${m.label.toUpperCase()} for &yen;${amount}
+      <div class="acquire-stage" style="--accent:${av.accent}">
+        <img class="acquire-avatar" src="${av.image}" alt="" />
+        <div class="acquire-text">
+          <div class="acquire-eyebrow">Acquired</div>
+          <div class="acquire-name">${escapeHtml(c.displayName)}</div>
+          <div class="acquire-meta">Player ${playerNum} &middot; &yen;${amount}</div>
+        </div>
       </div>
       <div class="draft-layout">
         <div></div>
@@ -515,7 +559,7 @@ function renderWinnerPhase() {
 }
 
 /* ---------------------------------------------------------------------
- * Draft / auction logic
+ * Draft / auction logic (UNCHANGED — locked game engine)
  * ------------------------------------------------------------------- */
 
 function playersNeedingCharacters() {
@@ -669,14 +713,15 @@ function renderVsScreen() {
   const revealed = state.results.revealed;
   const cards = state.results.teams
     .map((t, i) => {
-      const m = colorMeta(t.color);
+      const av = avatarMeta(t.avatarId);
       const scoreHtml = revealed
-        ? `<div class="score" data-score="${t.finalScore}" style="color:${m.hex}">${t.finalScore.toFixed(1)}</div>`
+        ? `<div class="score" data-score="${t.finalScore}" style="color:${av.accent}">${t.finalScore.toFixed(1)}</div>`
         : `<div class="score" data-score="${t.finalScore}" style="color:var(--text-dim)">?</div>`;
       const sep = i < state.results.teams.length - 1 ? `<div class="vs-sep">VS</div>` : "";
       return `
-        <div class="vs-card" style="border-color:${m.hex}">
-          <div class="name">${m.emoji} PLAYER ${t.playerNum}</div>
+        <div class="vs-card" style="--accent:${av.accent}">
+          <img class="vs-card-avatar" src="${av.image}" alt="" />
+          <div class="name">Player ${t.playerNum}</div>
           ${scoreHtml}
         </div>${sep}`;
     })
@@ -688,7 +733,7 @@ function renderVsScreen() {
 
   return `
     <div class="screen">
-      <div class="title">FINAL BATTLE</div>
+      <div class="title">Final Battle</div>
       <div class="subtitle">${franchiseLabel()} &middot; ${state.playerCount} Players</div>
       <div class="vs-row">${cards}</div>
       ${button}
@@ -704,38 +749,39 @@ function renderResultsScreen() {
 
   const rankingHtml = ranked
     .map((t, i) => {
-      const m = colorMeta(t.color);
+      const av = avatarMeta(t.avatarId);
       const rankClass = i === 0 ? "gold" : i === 1 ? "silver" : i === 2 ? "bronze" : "";
       return `
         <div class="rank-row ${rankClass}">
           <div class="rank-medal">${MEDALS[i]}</div>
-          <div class="rank-name">${m.emoji} ${m.label.toUpperCase()} &mdash; PLAYER ${t.playerNum}</div>
+          <img class="rank-avatar" src="${av.image}" alt="" />
+          <div class="rank-name">Player ${t.playerNum}</div>
           <div class="rank-score">${t.finalScore.toFixed(1)}</div>
         </div>`;
     })
     .join("");
 
   const winner = ranked[0];
-  const winnerMeta = colorMeta(winner.color);
-  const losers = ranked.slice(1).map((t) => colorMeta(t.color).label.toUpperCase());
+  const winnerAv = avatarMeta(winner.avatarId);
+  const losers = ranked.slice(1).map((t) => `Player ${t.playerNum}`);
   const losersJoined =
     losers.length <= 1
       ? losers.join("")
       : `${losers.slice(0, -1).join(", ")} & ${losers[losers.length - 1]}`;
-  const slainVerb = losers.length === 1 ? "WAS" : "WERE";
+  const slainVerb = losers.length === 1 ? "was" : "were";
 
   const detailCards = ranked
     .map((t) => {
-      const m = colorMeta(t.color);
+      const av = avatarMeta(t.avatarId);
       const memberRows = t.members
         .map((c) => `<div class="member-row"><span>${escapeHtml(c.displayName)} <span style="color:var(--text-dim);">(&yen;${c.paid})</span></span><span>${c.stats.power}</span></div>`)
         .join("");
       return `
-        <div class="team-detail-card" style="border-color:${m.hex}">
-          <h3><span class="dot" style="background:${m.hex}"></span>PLAYER ${t.playerNum} &mdash; ${m.label.toUpperCase()}</h3>
+        <div class="team-detail-card" style="--accent:${av.accent}">
+          <h3><img class="team-detail-avatar" src="${av.image}" alt="" />Player ${t.playerNum}</h3>
           ${memberRows}
-          <div class="team-score-line"><span>TEAM SCORE</span><span>${t.finalScore.toFixed(1)}</span></div>
-          <button class="breakdown-link" data-action="openBreakdown" data-value="${t.playerNum}">HOW WAS THIS SCORE CALCULATED?</button>
+          <div class="team-score-line"><span>Team Score</span><span>${t.finalScore.toFixed(1)}</span></div>
+          <button class="breakdown-link" data-action="openBreakdown" data-value="${t.playerNum}">How was this score calculated?</button>
         </div>`;
     })
     .join("");
@@ -744,18 +790,18 @@ function renderResultsScreen() {
 
   return `
     <div class="screen">
-      <div class="title">FINAL RESULTS</div>
+      <div class="title">Final Results</div>
       <div class="subtitle">${franchiseLabel()} &middot; ${state.playerCount} Players</div>
 
       <div class="ranking-list">${rankingHtml}</div>
 
-      <div class="winner-banner" style="color:${winnerMeta.hex}">\u{1F3C6} ${losersJoined} ${slainVerb} SLAIN BY ${winnerMeta.label.toUpperCase()}</div>
+      <div class="winner-banner" style="color:${winnerAv.accent}">${losersJoined} ${slainVerb} slain by Player ${winner.playerNum}</div>
 
       <div class="section-label" style="margin-top:36px;">Team Comparison</div>
       <div class="teams-detail">${detailCards}</div>
 
       <div class="btn-row">
-        <button class="btn secondary" data-action="restart">Play Again</button>
+        <button class="btn ghost" data-action="restart">Play Again</button>
       </div>
       ${modal}
     </div>`;
@@ -763,7 +809,6 @@ function renderResultsScreen() {
 
 function renderBreakdownModal(playerNum) {
   const t = state.results.teams.find((x) => x.playerNum === playerNum);
-  const m = colorMeta(t.color);
   const w = STAT_WEIGHTS;
 
   const statRows = Object.keys(STAT_LABELS)
@@ -774,7 +819,7 @@ function renderBreakdownModal(playerNum) {
     <div class="modal-overlay" data-action="closeBreakdown">
       <div class="modal" data-action="stop">
         <button class="modal-close" data-action="closeBreakdown">&times;</button>
-        <h3>${m.emoji} ${m.label.toUpperCase()} &mdash; Score Breakdown</h3>
+        <h3>Player ${playerNum} &mdash; Score Breakdown</h3>
 
         <div class="calc-note">Team: ${t.members.map((c) => c.displayName).join(", ")} (${t.members.length} members)</div>
 
@@ -784,9 +829,9 @@ function renderBreakdownModal(playerNum) {
         <div class="calc-row"><span>Teamwork = 100 &minus; (2 &times; stddev of member Power)</span><span>${t.teamwork.toFixed(1)}</span></div>
         <div class="calc-row"><span>Weighted Base = Core&times;0.85 + Teamwork&times;0.15</span><span>${t.weightedBase.toFixed(1)}</span></div>
         <div class="calc-row"><span>Synergy = (Core &minus; 70) &times; 0.08</span><span>${t.synergy >= 0 ? "+" : ""}${t.synergy.toFixed(1)}</span></div>
-        <div class="calc-row"><span>Randomness = seededRandom(seed ${state.matchSeed}, ${t.color}) &times; 3 &minus; 1.5</span><span>${t.randomness >= 0 ? "+" : ""}${t.randomness.toFixed(1)}</span></div>
+        <div class="calc-row"><span>Randomness = seededRandom(seed ${state.matchSeed}, ${t.avatarId}) &times; 3 &minus; 1.5</span><span>${t.randomness >= 0 ? "+" : ""}${t.randomness.toFixed(1)}</span></div>
 
-        <div class="calc-final"><span>FINAL SCORE</span><span>${t.finalScore.toFixed(1)}</span></div>
+        <div class="calc-final"><span>Final Score</span><span>${t.finalScore.toFixed(1)}</span></div>
 
         <div class="calc-note">
           Every stat above is derived from this team's drafted characters and the match seed &mdash; nothing is hidden.
@@ -799,7 +844,8 @@ function renderBreakdownModal(playerNum) {
 }
 
 /* ---------------------------------------------------------------------
- * Score computation
+ * Score computation (UNCHANGED math — only the `color` field is renamed
+ * to `avatarId`, since player identity is no longer color-based)
  * ------------------------------------------------------------------- */
 
 function draftSeedKey() {
@@ -813,7 +859,7 @@ function draftSeedKey() {
 function computeResults() {
   const teams = state.draftPicks.map((members, idx) => {
     const playerNum = idx + 1;
-    const color = state.colorAssign[idx];
+    const avatarId = state.avatarAssign[idx];
 
     // A team can end an auction with zero characters (every round can be won
     // by someone else) — guard the averages instead of dividing by zero.
@@ -845,13 +891,13 @@ function computeResults() {
 
     const weightedBase = round1(coreScore * 0.85 + teamwork * 0.15);
     const synergy = round1((coreScore - 70) * 0.08);
-    const randomness = round1(seededUnit(`${state.matchSeed}::${color}`) * 3 - 1.5);
+    const randomness = round1(seededUnit(`${state.matchSeed}::${avatarId}`) * 3 - 1.5);
 
     const finalScore = round1(weightedBase + synergy + randomness);
 
     return {
       playerNum,
-      color,
+      avatarId,
       members,
       avg,
       coreScore,
@@ -881,8 +927,8 @@ function franchiseLabel() {
   return fr ? fr.label : "";
 }
 
-function colorMeta(id) {
-  return COLORS.find((c) => c.id === id) || { label: "?", hex: "#888", emoji: "" };
+function avatarMeta(id) {
+  return AVATARS.find((a) => a.id === id) || { image: "", accent: "#888" };
 }
 
 function escapeHtml(str) {
@@ -898,7 +944,7 @@ function animateReveal() {
   if (btnRow) btnRow.disabled = true;
 
   const targets = scoreEls.map((el) => parseFloat(el.dataset.score));
-  const colors = state.results.teams.map((t) => colorMeta(t.color).hex);
+  const accents = state.results.teams.map((t) => avatarMeta(t.avatarId).accent);
   const duration = 1000;
   const start = performance.now();
 
@@ -906,7 +952,7 @@ function animateReveal() {
     const p = Math.min(1, (now - start) / duration);
     const eased = 1 - Math.pow(1 - p, 3);
     scoreEls.forEach((el, i) => {
-      el.style.color = colors[i];
+      el.style.color = accents[i];
       el.textContent = (targets[i] * eased).toFixed(1);
     });
     if (p < 1) {
@@ -945,17 +991,24 @@ function bindEvents() {
 
       case "pickCount":
         state.playerCount = parseInt(value, 10);
-        state.colorAssign = [];
-        state.colorStep = 0;
+        state.avatarAssign = [];
+        state.avatarStep = 0;
+        state.avatarHighlight = null;
         state.draftPicks = Array.from({ length: state.playerCount }, () => []);
-        state.screen = "color";
+        state.screen = "avatar";
         render();
         break;
 
-      case "pickColor":
-        state.colorAssign[state.colorStep] = value;
-        state.colorStep++;
-        if (state.colorStep >= state.playerCount) {
+      case "highlightAvatar":
+        state.avatarHighlight = value;
+        render();
+        break;
+
+      case "confirmAvatar":
+        state.avatarAssign[state.avatarStep] = value;
+        state.avatarStep++;
+        state.avatarHighlight = null;
+        if (state.avatarStep >= state.playerCount) {
           state.budgets = Array.from({ length: state.playerCount }, () => STARTING_BUDGET);
           state.draftedIds = new Set();
           state.totalRounds = state.playerCount * TEAM_SIZE;
@@ -971,7 +1024,7 @@ function bindEvents() {
       case "fillBidAmount": {
         const input = document.getElementById("customBidInput");
         if (input) input.value = value;
-        document.querySelectorAll(".bid-btn").forEach((b) => b.classList.remove("selected"));
+        document.querySelectorAll(".chip-btn").forEach((b) => b.classList.remove("selected"));
         el.classList.add("selected");
         break;
       }

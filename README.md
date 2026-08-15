@@ -1,11 +1,24 @@
-# Tier List Tournament
+# Manga Draft Arena
 
 A 2–4 player auction-draft battle game built from the Naruto and One Piece
-tier-list spreadsheets in this repo. Pick a universe, then fight the other
-players over yen (¥) for characters the game draws at random — you never
-pick a character directly, only how much you're willing to pay for the one
-it shows you, and only its name is revealed (no stats) while you're bidding.
-See a fully transparent, reproducible score decide the winner.
+tier-list spreadsheets in this repo. Pick a universe, pick a player avatar,
+then fight the other players over yen (¥) for characters the game draws at
+random — you never pick a character directly, only how much you're willing
+to pay for the one it shows you, and only its name is revealed (no stats)
+while you're bidding. See a fully transparent, reproducible score decide
+the winner.
+
+## Player identity: avatars, not colors
+
+Players are told apart by a chosen avatar portrait, not a color label. The
+four avatar images live in `avatars/` (`avatar-01.png` … `avatar-04.png`,
+sourced from `../image exemple/image perso/`) and are declared in
+`app.js`'s `AVATARS` array — `{ id, image, accent }`, where `accent` is a
+single decorative color pulled from that portrait's palette, used sparingly
+(a thin ring, a highlight) rather than as the player's primary identity. To
+add or swap avatars: drop a new image in `avatars/`, add an entry to
+`AVATARS`, no other code changes needed. Two players can never pick the
+same avatar in one game.
 
 ## How the draft works
 
@@ -80,5 +93,17 @@ Every number shown on the results screen is derived, never hidden:
 7. **Randomness** — a small ±1.5 swing seeded from a per-match seed (shown
    on screen) so it's replayable, not hidden.
 
-Click "HOW WAS THIS SCORE CALCULATED?" on any team's card in the results
+Click "How was this score calculated?" on any team's card in the results
 screen to see every one of these numbers for that specific match.
+
+## A note on character artwork
+
+There's no portrait artwork for the ~166 individual Naruto/One Piece
+characters that get auctioned — only the 4 player avatars are real assets.
+Rather than fake or scrape character art, the reveal/acquire screens use
+large-scale typography (the character's name, huge) as the visual centerpiece
+instead, with a deterministic per-character accent color (hashed from the
+character's id, see `characterAccent()` in `app.js`) standing in for
+"artwork reacting to the character." If real character art is added later,
+`renderCharacterCard()` is the single place to swap the name-only treatment
+for an image.
