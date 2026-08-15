@@ -91,6 +91,7 @@ const state = {
   matchSeed: null,
   results: null, // computed on entering results
   modalTeam: null, // player number whose "how calculated" modal is open
+  showRestartConfirm: false,
 };
 
 function resetGame() {
@@ -117,6 +118,7 @@ function resetGame() {
   state.matchSeed = null;
   state.results = null;
   state.modalTeam = null;
+  state.showRestartConfirm = false;
 }
 
 /* ---------------------------------------------------------------------
@@ -269,20 +271,46 @@ function renderColorScreen() {
  * ------------------------------------------------------------------- */
 
 function renderDraftScreen() {
+  let phaseHtml;
   switch (state.phase) {
     case "drawing":
-      return renderDrawingPhase();
+      phaseHtml = renderDrawingPhase();
+      break;
     case "opening":
-      return renderOpeningPhase();
+      phaseHtml = renderOpeningPhase();
+      break;
     case "bidding":
-      return renderBiddingPhase();
+      phaseHtml = renderBiddingPhase();
+      break;
     case "freeChoice":
-      return renderFreeChoicePhase();
+      phaseHtml = renderFreeChoicePhase();
+      break;
     case "winner":
-      return renderWinnerPhase();
+      phaseHtml = renderWinnerPhase();
+      break;
     default:
-      return `<div class="screen center"><p>...</p></div>`;
+      phaseHtml = `<div class="screen center"><p>...</p></div>`;
   }
+  return `
+    ${phaseHtml}
+    <div class="restart-footer">
+      <button class="btn secondary" data-action="requestRestart">&#8634; Restart Game</button>
+    </div>
+    ${state.showRestartConfirm ? renderRestartConfirm() : ""}`;
+}
+
+function renderRestartConfirm() {
+  return `
+    <div class="modal-overlay" data-action="cancelRestart">
+      <div class="modal" data-action="stop" style="max-width:420px;text-align:center;">
+        <h3>Restart Game?</h3>
+        <p class="calc-note" style="font-size:0.9rem;">This game's progress will be lost and you'll go back to universe select.</p>
+        <div class="btn-row">
+          <button class="btn" data-action="confirmRestartYes">Yes, Start Over</button>
+          <button class="btn secondary" data-action="cancelRestart">No, Continue</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderTeamsSidebar(highlightPlayer) {
@@ -363,7 +391,7 @@ function renderOpeningPhase() {
   const amounts = quickBidAmounts(1, remaining);
 
   const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="placeOpeningBid" data-value="${amt}">&yen;${amt}</button>`)
+    .map((amt) => `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`)
     .join("");
 
   return `
@@ -373,14 +401,14 @@ function renderOpeningPhase() {
 
       <div class="bidder-panel">
         ${renderTurnBanner(opener, `&mdash; OPENING BID &middot; &yen;${remaining}`)}
-        <p class="calc-note center">Must bid at least &yen;1 to open the auction.</p>
+        <p class="calc-note center">Must bid at least &yen;1 to open the auction. Pick an amount, then confirm.</p>
         <div class="bid-quick-row">
           ${quickButtons}
-          <button class="btn bid-btn all-in" data-action="placeOpeningBid" data-value="${remaining}">ALL IN</button>
+          <button class="btn bid-btn all-in" data-action="fillBidAmount" data-value="${remaining}">ALL IN</button>
         </div>
         <div class="bid-custom-row">
-          <input type="number" id="customBidInput" min="1" max="${remaining}" step="1" placeholder="Custom amount" />
-          <button class="btn secondary" data-action="placeOpeningBidCustom">Place Bid</button>
+          <input type="number" id="customBidInput" min="1" max="${remaining}" step="1" placeholder="Amount" />
+          <button class="btn" data-action="placeOpeningBidCustom">Confirm Bid</button>
         </div>
       </div>
 
@@ -399,30 +427,22 @@ function renderBiddingPhase() {
   const canRaise = remaining >= minRaise;
   const amounts = canRaise ? quickBidAmounts(minRaise, remaining) : [];
 
-  const track = state.auctionOrder
-    .map((p) => {
-      const m = colorMeta(state.colorAssign[p - 1]);
-      const cls = p === turnPlayer ? "active" : p === state.currentBidder ? "done" : "";
-      const label = p === state.currentBidder ? `HIGH BID &yen;${state.currentBid}` : "in auction";
-      return `<div class="player-pill ${cls}">${m.emoji} P${p}: ${label}</div>`;
-    })
-    .join("");
-
   const quickButtons = amounts
-    .map((amt) => `<button class="btn bid-btn" data-action="raiseBid" data-value="${amt}">&yen;${amt}</button>`)
+    .map((amt) => `<button class="btn bid-btn" data-action="fillBidAmount" data-value="${amt}">&yen;${amt}</button>`)
     .join("");
 
   // TAKE (instant-win at the standing price) doesn't exist — a player either
-  // raises the bid or withdraws and lets it go to whoever's still in.
+  // raises the bid or withdraws and lets it go to whoever's still in. Picking
+  // an amount only fills it in; RAISE confirms.
   const raiseControls = canRaise
     ? `
       <div class="bid-quick-row">
         ${quickButtons}
-        <button class="btn bid-btn all-in" data-action="raiseBid" data-value="${remaining}">ALL IN</button>
+        <button class="btn bid-btn all-in" data-action="fillBidAmount" data-value="${remaining}">ALL IN</button>
       </div>
       <div class="bid-custom-row">
-        <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Custom amount" />
-        <button class="btn secondary" data-action="raiseBidCustom">Raise</button>
+        <input type="number" id="customBidInput" min="${minRaise}" max="${remaining}" step="1" placeholder="Amount" />
+        <button class="btn" data-action="raiseBidCustom">Raise</button>
       </div>`
     : `<p class="calc-note center">Not enough &yen; left to raise.</p>`;
 
@@ -435,8 +455,6 @@ function renderBiddingPhase() {
         <div class="bid-hero-label">CURRENT BID</div>
         <div class="bid-hero-amount" style="color:${bidderMeta.hex};background:rgba(0,0,0,0.35);">&yen;${state.currentBid}</div>
       </div>
-
-      <div class="player-track">${track}</div>
 
       <div class="bidder-panel">
         ${renderTurnBanner(turnPlayer, `&mdash; YOUR TURN &middot; &yen;${remaining}`)}
@@ -702,6 +720,12 @@ function renderResultsScreen() {
 
   const winner = ranked[0];
   const winnerMeta = colorMeta(winner.color);
+  const losers = ranked.slice(1).map((t) => colorMeta(t.color).label.toUpperCase());
+  const losersJoined =
+    losers.length <= 1
+      ? losers.join("")
+      : `${losers.slice(0, -1).join(", ")} & ${losers[losers.length - 1]}`;
+  const slainVerb = losers.length === 1 ? "WAS" : "WERE";
 
   const detailCards = ranked
     .map((t) => {
@@ -728,7 +752,7 @@ function renderResultsScreen() {
 
       <div class="ranking-list">${rankingHtml}</div>
 
-      <div class="winner-banner" style="color:${winnerMeta.hex}">\u{1F3C6} ${winnerMeta.label.toUpperCase()} WINS!!</div>
+      <div class="winner-banner" style="color:${winnerMeta.hex}">\u{1F3C6} ${losersJoined} ${slainVerb} SLAIN BY ${winnerMeta.label.toUpperCase()}</div>
 
       <div class="section-label" style="margin-top:36px;">Team Comparison</div>
       <div class="teams-detail">${detailCards}</div>
@@ -947,9 +971,13 @@ function bindEvents() {
         render();
         break;
 
-      case "placeOpeningBid":
-        placeOpeningBid(parseInt(value, 10));
+      case "fillBidAmount": {
+        const input = document.getElementById("customBidInput");
+        if (input) input.value = value;
+        document.querySelectorAll(".bid-btn").forEach((b) => b.classList.remove("selected"));
+        el.classList.add("selected");
         break;
+      }
 
       case "placeOpeningBidCustom": {
         const input = document.getElementById("customBidInput");
@@ -958,10 +986,6 @@ function bindEvents() {
         placeOpeningBid(amount);
         break;
       }
-
-      case "raiseBid":
-        raiseBid(parseInt(value, 10));
-        break;
 
       case "raiseBidCustom": {
         const input = document.getElementById("customBidInput");
@@ -1013,6 +1037,22 @@ function bindEvents() {
       case "restart":
         resetGame();
         state.screen = "franchise";
+        render();
+        break;
+
+      case "requestRestart":
+        state.showRestartConfirm = true;
+        render();
+        break;
+
+      case "confirmRestartYes":
+        resetGame();
+        state.screen = "franchise";
+        render();
+        break;
+
+      case "cancelRestart":
+        state.showRestartConfirm = false;
         render();
         break;
     }
