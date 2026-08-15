@@ -1,0 +1,2674 @@
+{
+  "franchises": [
+    {
+      "id": "naruto",
+      "label": "Naruto",
+      "count": 99,
+      "characters": [
+        {
+          "id": "naruto-000",
+          "name": "Kaguya",
+          "displayName": "Kaguya",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 1,
+          "stats": {
+            "power": 99,
+            "speed": 100,
+            "durability": 95,
+            "hax": 100,
+            "battleIQ": 94
+          }
+        },
+        {
+          "id": "naruto-001",
+          "name": "Hagoromo",
+          "displayName": "Hagoromo",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 2,
+          "stats": {
+            "power": 98,
+            "speed": 100,
+            "durability": 100,
+            "hax": 93,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "naruto-002",
+          "name": "Hamura",
+          "displayName": "Hamura",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 3,
+          "stats": {
+            "power": 98,
+            "speed": 93,
+            "durability": 91,
+            "hax": 100,
+            "battleIQ": 97
+          }
+        },
+        {
+          "id": "naruto-003",
+          "name": "Naruto",
+          "displayName": "Naruto",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 4,
+          "stats": {
+            "power": 97,
+            "speed": 91,
+            "durability": 98,
+            "hax": 90,
+            "battleIQ": 93
+          }
+        },
+        {
+          "id": "naruto-004",
+          "name": "Sasuke",
+          "displayName": "Sasuke",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 5,
+          "stats": {
+            "power": 97,
+            "speed": 100,
+            "durability": 94,
+            "hax": 100,
+            "battleIQ": 96
+          }
+        },
+        {
+          "id": "naruto-005",
+          "name": "Toneri",
+          "displayName": "Toneri",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 6,
+          "stats": {
+            "power": 96,
+            "speed": 92,
+            "durability": 98,
+            "hax": 100,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "naruto-006",
+          "name": "Madara",
+          "displayName": "Madara",
+          "franchise": "naruto",
+          "tierLabel": "Matured Six Paths",
+          "tierRank": 1,
+          "ordinal": 7,
+          "stats": {
+            "power": 95,
+            "speed": 88,
+            "durability": 99,
+            "hax": 92,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "naruto-007",
+          "name": "Ashura",
+          "displayName": "Ashura",
+          "franchise": "naruto",
+          "tierLabel": "Six Paths",
+          "tierRank": 2,
+          "ordinal": 8,
+          "stats": {
+            "power": 95,
+            "speed": 94,
+            "durability": 91,
+            "hax": 95,
+            "battleIQ": 91
+          }
+        },
+        {
+          "id": "naruto-008",
+          "name": "Indra",
+          "displayName": "Indra",
+          "franchise": "naruto",
+          "tierLabel": "Six Paths",
+          "tierRank": 2,
+          "ordinal": 9,
+          "stats": {
+            "power": 94,
+            "speed": 99,
+            "durability": 100,
+            "hax": 90,
+            "battleIQ": 99
+          }
+        },
+        {
+          "id": "naruto-009",
+          "name": "Kakashi",
+          "displayName": "Kakashi",
+          "franchise": "naruto",
+          "tierLabel": "Six Paths",
+          "tierRank": 2,
+          "ordinal": 10,
+          "stats": {
+            "power": 94,
+            "speed": 91,
+            "durability": 98,
+            "hax": 88,
+            "battleIQ": 87
+          }
+        },
+        {
+          "id": "naruto-010",
+          "name": "Obito",
+          "displayName": "Obito",
+          "franchise": "naruto",
+          "tierLabel": "Low Six Paths",
+          "tierRank": 3,
+          "ordinal": 11,
+          "stats": {
+            "power": 93,
+            "speed": 88,
+            "durability": 88,
+            "hax": 90,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "naruto-011",
+          "name": "Might Guy",
+          "displayName": "Might Guy",
+          "franchise": "naruto",
+          "tierLabel": "Entry Six Paths",
+          "tierRank": 4,
+          "ordinal": 12,
+          "stats": {
+            "power": 92,
+            "speed": 90,
+            "durability": 96,
+            "hax": 97,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "naruto-012",
+          "name": "Hashirama",
+          "displayName": "Hashirama",
+          "franchise": "naruto",
+          "tierLabel": "God of Shinobi",
+          "tierRank": 5,
+          "ordinal": 13,
+          "stats": {
+            "power": 92,
+            "speed": 95,
+            "durability": 87,
+            "hax": 86,
+            "battleIQ": 89
+          }
+        },
+        {
+          "id": "naruto-013",
+          "name": "Minato",
+          "displayName": "Minato",
+          "franchise": "naruto",
+          "tierLabel": "Legend",
+          "tierRank": 6,
+          "ordinal": 14,
+          "stats": {
+            "power": 91,
+            "speed": 86,
+            "durability": 96,
+            "hax": 99,
+            "battleIQ": 91
+          }
+        },
+        {
+          "id": "naruto-014",
+          "name": "Kabuto",
+          "displayName": "Kabuto",
+          "franchise": "naruto",
+          "tierLabel": "Beyond Kage",
+          "tierRank": 7,
+          "ordinal": 15,
+          "stats": {
+            "power": 91,
+            "speed": 98,
+            "durability": 85,
+            "hax": 93,
+            "battleIQ": 85
+          }
+        },
+        {
+          "id": "naruto-015",
+          "name": "Nagato",
+          "displayName": "Nagato",
+          "franchise": "naruto",
+          "tierLabel": "Beyond Kage",
+          "tierRank": 7,
+          "ordinal": 16,
+          "stats": {
+            "power": 90,
+            "speed": 94,
+            "durability": 92,
+            "hax": 93,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "naruto-016",
+          "name": "Itachi",
+          "displayName": "Itachi",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 17,
+          "stats": {
+            "power": 89,
+            "speed": 90,
+            "durability": 92,
+            "hax": 82,
+            "battleIQ": 82
+          }
+        },
+        {
+          "id": "naruto-017",
+          "name": "Hiruzen",
+          "displayName": "Hiruzen",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 18,
+          "stats": {
+            "power": 89,
+            "speed": 81,
+            "durability": 83,
+            "hax": 84,
+            "battleIQ": 89
+          }
+        },
+        {
+          "id": "naruto-018",
+          "name": "Tobirama",
+          "displayName": "Tobirama",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 19,
+          "stats": {
+            "power": 88,
+            "speed": 88,
+            "durability": 90,
+            "hax": 94,
+            "battleIQ": 93
+          }
+        },
+        {
+          "id": "naruto-019",
+          "name": "Killer Bee",
+          "displayName": "Killer Bee",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 20,
+          "stats": {
+            "power": 88,
+            "speed": 92,
+            "durability": 91,
+            "hax": 93,
+            "battleIQ": 84
+          }
+        },
+        {
+          "id": "naruto-020",
+          "name": "Lord Mu",
+          "displayName": "Lord Mu",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 21,
+          "stats": {
+            "power": 87,
+            "speed": 79,
+            "durability": 81,
+            "hax": 90,
+            "battleIQ": 79
+          }
+        },
+        {
+          "id": "naruto-021",
+          "name": "Gengetsu",
+          "displayName": "Gengetsu",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 22,
+          "stats": {
+            "power": 86,
+            "speed": 89,
+            "durability": 87,
+            "hax": 80,
+            "battleIQ": 83
+          }
+        },
+        {
+          "id": "naruto-022",
+          "name": "Onoki",
+          "displayName": "Onoki",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 23,
+          "stats": {
+            "power": 86,
+            "speed": 87,
+            "durability": 85,
+            "hax": 92,
+            "battleIQ": 87
+          }
+        },
+        {
+          "id": "naruto-023",
+          "name": "Sakura",
+          "displayName": "Sakura",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 24,
+          "stats": {
+            "power": 85,
+            "speed": 80,
+            "durability": 84,
+            "hax": 79,
+            "battleIQ": 91
+          }
+        },
+        {
+          "id": "naruto-024",
+          "name": "3rd Raikage",
+          "displayName": "3rd Raikage",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 25,
+          "stats": {
+            "power": 85,
+            "speed": 82,
+            "durability": 93,
+            "hax": 84,
+            "battleIQ": 76
+          }
+        },
+        {
+          "id": "naruto-025",
+          "name": "Hanzo",
+          "displayName": "Hanzo",
+          "franchise": "naruto",
+          "tierLabel": "High Kage",
+          "tierRank": 8,
+          "ordinal": 26,
+          "stats": {
+            "power": 84,
+            "speed": 89,
+            "durability": 80,
+            "hax": 76,
+            "battleIQ": 76
+          }
+        },
+        {
+          "id": "naruto-026",
+          "name": "White Zetsu",
+          "displayName": "White Zetsu",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 27,
+          "stats": {
+            "power": 83,
+            "speed": 78,
+            "durability": 80,
+            "hax": 87,
+            "battleIQ": 88
+          }
+        },
+        {
+          "id": "naruto-027",
+          "name": "Sakumo",
+          "displayName": "Sakumo",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 28,
+          "stats": {
+            "power": 83,
+            "speed": 84,
+            "durability": 78,
+            "hax": 79,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "naruto-028",
+          "name": "Tsunade",
+          "displayName": "Tsunade",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 29,
+          "stats": {
+            "power": 82,
+            "speed": 85,
+            "durability": 78,
+            "hax": 79,
+            "battleIQ": 79
+          }
+        },
+        {
+          "id": "naruto-029",
+          "name": "Orochimaru",
+          "displayName": "Orochimaru",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 30,
+          "stats": {
+            "power": 82,
+            "speed": 87,
+            "durability": 77,
+            "hax": 79,
+            "battleIQ": 80
+          }
+        },
+        {
+          "id": "naruto-030",
+          "name": "Jiraiya",
+          "displayName": "Jiraiya",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 31,
+          "stats": {
+            "power": 81,
+            "speed": 85,
+            "durability": 81,
+            "hax": 83,
+            "battleIQ": 87
+          }
+        },
+        {
+          "id": "naruto-031",
+          "name": "Kisame",
+          "displayName": "Kisame",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 32,
+          "stats": {
+            "power": 80,
+            "speed": 74,
+            "durability": 84,
+            "hax": 74,
+            "battleIQ": 74
+          }
+        },
+        {
+          "id": "naruto-032",
+          "name": "Gaara",
+          "displayName": "Gaara",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 33,
+          "stats": {
+            "power": 80,
+            "speed": 71,
+            "durability": 81,
+            "hax": 79,
+            "battleIQ": 86
+          }
+        },
+        {
+          "id": "naruto-033",
+          "name": "Danzo",
+          "displayName": "Danzo",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 34,
+          "stats": {
+            "power": 79,
+            "speed": 72,
+            "durability": 82,
+            "hax": 72,
+            "battleIQ": 83
+          }
+        },
+        {
+          "id": "naruto-034",
+          "name": "4th Raikage",
+          "displayName": "4th Raikage",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 35,
+          "stats": {
+            "power": 79,
+            "speed": 84,
+            "durability": 72,
+            "hax": 84,
+            "battleIQ": 77
+          }
+        },
+        {
+          "id": "naruto-035",
+          "name": "Shisui",
+          "displayName": "Shisui",
+          "franchise": "naruto",
+          "tierLabel": "Mid Kage",
+          "tierRank": 9,
+          "ordinal": 36,
+          "stats": {
+            "power": 78,
+            "speed": 75,
+            "durability": 80,
+            "hax": 84,
+            "battleIQ": 86
+          }
+        },
+        {
+          "id": "naruto-036",
+          "name": "Mei",
+          "displayName": "Mei",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 37,
+          "stats": {
+            "power": 77,
+            "speed": 69,
+            "durability": 85,
+            "hax": 72,
+            "battleIQ": 81
+          }
+        },
+        {
+          "id": "naruto-037",
+          "name": "Konan",
+          "displayName": "Konan",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 38,
+          "stats": {
+            "power": 77,
+            "speed": 79,
+            "durability": 81,
+            "hax": 80,
+            "battleIQ": 76
+          }
+        },
+        {
+          "id": "naruto-038",
+          "name": "Sasori",
+          "displayName": "Sasori",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 39,
+          "stats": {
+            "power": 76,
+            "speed": 70,
+            "durability": 81,
+            "hax": 80,
+            "battleIQ": 82
+          }
+        },
+        {
+          "id": "naruto-039",
+          "name": "Kazekage",
+          "displayName": "Kazekage",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 40,
+          "stats": {
+            "power": 76,
+            "speed": 81,
+            "durability": 78,
+            "hax": 85,
+            "battleIQ": 71
+          }
+        },
+        {
+          "id": "naruto-040",
+          "name": "Deidara",
+          "displayName": "Deidara",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 41,
+          "stats": {
+            "power": 75,
+            "speed": 72,
+            "durability": 69,
+            "hax": 69,
+            "battleIQ": 70
+          }
+        },
+        {
+          "id": "naruto-041",
+          "name": "Rasa",
+          "displayName": "Rasa",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 42,
+          "stats": {
+            "power": 74,
+            "speed": 74,
+            "durability": 81,
+            "hax": 68,
+            "battleIQ": 74
+          }
+        },
+        {
+          "id": "naruto-042",
+          "name": "Choji",
+          "displayName": "Choji",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 43,
+          "stats": {
+            "power": 74,
+            "speed": 82,
+            "durability": 73,
+            "hax": 78,
+            "battleIQ": 70
+          }
+        },
+        {
+          "id": "naruto-043",
+          "name": "Kitsuchi",
+          "displayName": "Kitsuchi",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 44,
+          "stats": {
+            "power": 73,
+            "speed": 80,
+            "durability": 77,
+            "hax": 64,
+            "battleIQ": 67
+          }
+        },
+        {
+          "id": "naruto-044",
+          "name": "Kakuzu",
+          "displayName": "Kakuzu",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 45,
+          "stats": {
+            "power": 73,
+            "speed": 66,
+            "durability": 69,
+            "hax": 76,
+            "battleIQ": 65
+          }
+        },
+        {
+          "id": "naruto-045",
+          "name": "Rock Lee",
+          "displayName": "Rock Lee",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 46,
+          "stats": {
+            "power": 72,
+            "speed": 63,
+            "durability": 71,
+            "hax": 63,
+            "battleIQ": 80
+          }
+        },
+        {
+          "id": "naruto-046",
+          "name": "Chiyo",
+          "displayName": "Chiyo",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 47,
+          "stats": {
+            "power": 71,
+            "speed": 65,
+            "durability": 73,
+            "hax": 62,
+            "battleIQ": 74
+          }
+        },
+        {
+          "id": "naruto-047",
+          "name": "Fugaku",
+          "displayName": "Fugaku",
+          "franchise": "naruto",
+          "tierLabel": "Kage",
+          "tierRank": 10,
+          "ordinal": 48,
+          "stats": {
+            "power": 71,
+            "speed": 64,
+            "durability": 73,
+            "hax": 69,
+            "battleIQ": 66
+          }
+        },
+        {
+          "id": "naruto-048",
+          "name": "Yugito",
+          "displayName": "Yugito",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 49,
+          "stats": {
+            "power": 70,
+            "speed": 75,
+            "durability": 62,
+            "hax": 75,
+            "battleIQ": 64
+          }
+        },
+        {
+          "id": "naruto-049",
+          "name": "Darui",
+          "displayName": "Darui",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 50,
+          "stats": {
+            "power": 69,
+            "speed": 61,
+            "durability": 63,
+            "hax": 72,
+            "battleIQ": 76
+          }
+        },
+        {
+          "id": "naruto-050",
+          "name": "Kinkaku / Ginkaku",
+          "displayName": "Kinkaku / Ginkaku",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 51,
+          "stats": {
+            "power": 69,
+            "speed": 62,
+            "durability": 62,
+            "hax": 70,
+            "battleIQ": 61
+          }
+        },
+        {
+          "id": "naruto-051",
+          "name": "Mifune",
+          "displayName": "Mifune",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 52,
+          "stats": {
+            "power": 68,
+            "speed": 76,
+            "durability": 71,
+            "hax": 63,
+            "battleIQ": 77
+          }
+        },
+        {
+          "id": "naruto-052",
+          "name": "Tenten",
+          "displayName": "Tenten",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 53,
+          "stats": {
+            "power": 68,
+            "speed": 72,
+            "durability": 64,
+            "hax": 66,
+            "battleIQ": 63
+          }
+        },
+        {
+          "id": "naruto-053",
+          "name": "Hidan",
+          "displayName": "Hidan",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 54,
+          "stats": {
+            "power": 67,
+            "speed": 61,
+            "durability": 62,
+            "hax": 61,
+            "battleIQ": 62
+          }
+        },
+        {
+          "id": "naruto-054",
+          "name": "Dan",
+          "displayName": "Dan",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 55,
+          "stats": {
+            "power": 66,
+            "speed": 71,
+            "durability": 62,
+            "hax": 68,
+            "battleIQ": 60
+          }
+        },
+        {
+          "id": "naruto-055",
+          "name": "Kimimaro",
+          "displayName": "Kimimaro",
+          "franchise": "naruto",
+          "tierLabel": "Kage Level Contenders",
+          "tierRank": 11,
+          "ordinal": 56,
+          "stats": {
+            "power": 66,
+            "speed": 57,
+            "durability": 66,
+            "hax": 57,
+            "battleIQ": 68
+          }
+        },
+        {
+          "id": "naruto-056",
+          "name": "Temari",
+          "displayName": "Temari",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 57,
+          "stats": {
+            "power": 65,
+            "speed": 72,
+            "durability": 59,
+            "hax": 64,
+            "battleIQ": 69
+          }
+        },
+        {
+          "id": "naruto-057",
+          "name": "Kurotsuchi",
+          "displayName": "Kurotsuchi",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 58,
+          "stats": {
+            "power": 65,
+            "speed": 57,
+            "durability": 59,
+            "hax": 57,
+            "battleIQ": 73
+          }
+        },
+        {
+          "id": "naruto-058",
+          "name": "Haku",
+          "displayName": "Haku",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 59,
+          "stats": {
+            "power": 64,
+            "speed": 60,
+            "durability": 57,
+            "hax": 71,
+            "battleIQ": 57
+          }
+        },
+        {
+          "id": "naruto-059",
+          "name": "Zabuza",
+          "displayName": "Zabuza",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 60,
+          "stats": {
+            "power": 63,
+            "speed": 56,
+            "durability": 64,
+            "hax": 67,
+            "battleIQ": 56
+          }
+        },
+        {
+          "id": "naruto-060",
+          "name": "Kankuro",
+          "displayName": "Kankuro",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 61,
+          "stats": {
+            "power": 63,
+            "speed": 66,
+            "durability": 60,
+            "hax": 65,
+            "battleIQ": 62
+          }
+        },
+        {
+          "id": "naruto-061",
+          "name": "Fu / Torune",
+          "displayName": "Fu / Torune",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 62,
+          "stats": {
+            "power": 62,
+            "speed": 62,
+            "durability": 68,
+            "hax": 58,
+            "battleIQ": 59
+          }
+        },
+        {
+          "id": "naruto-062",
+          "name": "Yamato",
+          "displayName": "Yamato",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 63,
+          "stats": {
+            "power": 62,
+            "speed": 61,
+            "durability": 54,
+            "hax": 62,
+            "battleIQ": 62
+          }
+        },
+        {
+          "id": "naruto-063",
+          "name": "Asuma",
+          "displayName": "Asuma",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 64,
+          "stats": {
+            "power": 61,
+            "speed": 60,
+            "durability": 62,
+            "hax": 53,
+            "battleIQ": 70
+          }
+        },
+        {
+          "id": "naruto-064",
+          "name": "Sai",
+          "displayName": "Sai",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 65,
+          "stats": {
+            "power": 60,
+            "speed": 63,
+            "durability": 63,
+            "hax": 69,
+            "battleIQ": 53
+          }
+        },
+        {
+          "id": "naruto-065",
+          "name": "Suigetsu",
+          "displayName": "Suigetsu",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 66,
+          "stats": {
+            "power": 60,
+            "speed": 67,
+            "durability": 62,
+            "hax": 69,
+            "battleIQ": 67
+          }
+        },
+        {
+          "id": "naruto-066",
+          "name": "Chojuro",
+          "displayName": "Chojuro",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 67,
+          "stats": {
+            "power": 59,
+            "speed": 51,
+            "durability": 66,
+            "hax": 53,
+            "battleIQ": 54
+          }
+        },
+        {
+          "id": "naruto-067",
+          "name": "Jugo",
+          "displayName": "Jugo",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 68,
+          "stats": {
+            "power": 59,
+            "speed": 63,
+            "durability": 61,
+            "hax": 57,
+            "battleIQ": 50
+          }
+        },
+        {
+          "id": "naruto-068",
+          "name": "Kurenai",
+          "displayName": "Kurenai",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 69,
+          "stats": {
+            "power": 58,
+            "speed": 54,
+            "durability": 58,
+            "hax": 57,
+            "battleIQ": 51
+          }
+        },
+        {
+          "id": "naruto-069",
+          "name": "Hiashi",
+          "displayName": "Hiashi",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 70,
+          "stats": {
+            "power": 57,
+            "speed": 57,
+            "durability": 56,
+            "hax": 51,
+            "battleIQ": 63
+          }
+        },
+        {
+          "id": "naruto-070",
+          "name": "Choza",
+          "displayName": "Choza",
+          "franchise": "naruto",
+          "tierLabel": "Elite",
+          "tierRank": 12,
+          "ordinal": 71,
+          "stats": {
+            "power": 57,
+            "speed": 49,
+            "durability": 65,
+            "hax": 59,
+            "battleIQ": 63
+          }
+        },
+        {
+          "id": "naruto-071",
+          "name": "Neji",
+          "displayName": "Neji",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 72,
+          "stats": {
+            "power": 56,
+            "speed": 62,
+            "durability": 62,
+            "hax": 53,
+            "battleIQ": 52
+          }
+        },
+        {
+          "id": "naruto-072",
+          "name": "Hinata",
+          "displayName": "Hinata",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 73,
+          "stats": {
+            "power": 56,
+            "speed": 59,
+            "durability": 59,
+            "hax": 64,
+            "battleIQ": 56
+          }
+        },
+        {
+          "id": "naruto-073",
+          "name": "Shino",
+          "displayName": "Shino",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 74,
+          "stats": {
+            "power": 55,
+            "speed": 55,
+            "durability": 62,
+            "hax": 60,
+            "battleIQ": 50
+          }
+        },
+        {
+          "id": "naruto-074",
+          "name": "Kiba",
+          "displayName": "Kiba",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 75,
+          "stats": {
+            "power": 54,
+            "speed": 51,
+            "durability": 58,
+            "hax": 58,
+            "battleIQ": 60
+          }
+        },
+        {
+          "id": "naruto-075",
+          "name": "Shikaku",
+          "displayName": "Shikaku",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 76,
+          "stats": {
+            "power": 54,
+            "speed": 61,
+            "durability": 61,
+            "hax": 54,
+            "battleIQ": 47
+          }
+        },
+        {
+          "id": "naruto-076",
+          "name": "Shikamaru",
+          "displayName": "Shikamaru",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 77,
+          "stats": {
+            "power": 53,
+            "speed": 49,
+            "durability": 61,
+            "hax": 60,
+            "battleIQ": 53
+          }
+        },
+        {
+          "id": "naruto-077",
+          "name": "Akatsuchi",
+          "displayName": "Akatsuchi",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 78,
+          "stats": {
+            "power": 53,
+            "speed": 56,
+            "durability": 44,
+            "hax": 54,
+            "battleIQ": 49
+          }
+        },
+        {
+          "id": "naruto-078",
+          "name": "Aoba",
+          "displayName": "Aoba",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 79,
+          "stats": {
+            "power": 52,
+            "speed": 48,
+            "durability": 44,
+            "hax": 44,
+            "battleIQ": 49
+          }
+        },
+        {
+          "id": "naruto-079",
+          "name": "Genma",
+          "displayName": "Genma",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 80,
+          "stats": {
+            "power": 51,
+            "speed": 44,
+            "durability": 58,
+            "hax": 49,
+            "battleIQ": 52
+          }
+        },
+        {
+          "id": "naruto-080",
+          "name": "Raido",
+          "displayName": "Raido",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 81,
+          "stats": {
+            "power": 51,
+            "speed": 43,
+            "durability": 60,
+            "hax": 42,
+            "battleIQ": 46
+          }
+        },
+        {
+          "id": "naruto-081",
+          "name": "Cee",
+          "displayName": "Cee",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 82,
+          "stats": {
+            "power": 50,
+            "speed": 50,
+            "durability": 54,
+            "hax": 58,
+            "battleIQ": 57
+          }
+        },
+        {
+          "id": "naruto-082",
+          "name": "Anko",
+          "displayName": "Anko",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 83,
+          "stats": {
+            "power": 50,
+            "speed": 43,
+            "durability": 47,
+            "hax": 56,
+            "battleIQ": 44
+          }
+        },
+        {
+          "id": "naruto-083",
+          "name": "Shizune",
+          "displayName": "Shizune",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 84,
+          "stats": {
+            "power": 49,
+            "speed": 43,
+            "durability": 45,
+            "hax": 43,
+            "battleIQ": 42
+          }
+        },
+        {
+          "id": "naruto-084",
+          "name": "Inoichi",
+          "displayName": "Inoichi",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 85,
+          "stats": {
+            "power": 48,
+            "speed": 48,
+            "durability": 49,
+            "hax": 43,
+            "battleIQ": 52
+          }
+        },
+        {
+          "id": "naruto-085",
+          "name": "Ino",
+          "displayName": "Ino",
+          "franchise": "naruto",
+          "tierLabel": "Strong Jonin",
+          "tierRank": 13,
+          "ordinal": 86,
+          "stats": {
+            "power": 48,
+            "speed": 54,
+            "durability": 51,
+            "hax": 50,
+            "battleIQ": 42
+          }
+        },
+        {
+          "id": "naruto-086",
+          "name": "Izumo / Kotetsu",
+          "displayName": "Izumo / Kotetsu",
+          "franchise": "naruto",
+          "tierLabel": "Jonin",
+          "tierRank": 14,
+          "ordinal": 87,
+          "stats": {
+            "power": 47,
+            "speed": 44,
+            "durability": 44,
+            "hax": 44,
+            "battleIQ": 52
+          }
+        },
+        {
+          "id": "naruto-087",
+          "name": "Hayate",
+          "displayName": "Hayate",
+          "franchise": "naruto",
+          "tierLabel": "Jonin",
+          "tierRank": 14,
+          "ordinal": 88,
+          "stats": {
+            "power": 47,
+            "speed": 46,
+            "durability": 39,
+            "hax": 51,
+            "battleIQ": 42
+          }
+        },
+        {
+          "id": "naruto-088",
+          "name": "Ibiki",
+          "displayName": "Ibiki",
+          "franchise": "naruto",
+          "tierLabel": "Jonin",
+          "tierRank": 14,
+          "ordinal": 89,
+          "stats": {
+            "power": 46,
+            "speed": 50,
+            "durability": 54,
+            "hax": 52,
+            "battleIQ": 37
+          }
+        },
+        {
+          "id": "naruto-089",
+          "name": "Ebisu",
+          "displayName": "Ebisu",
+          "franchise": "naruto",
+          "tierLabel": "Low Jonin",
+          "tierRank": 15,
+          "ordinal": 90,
+          "stats": {
+            "power": 45,
+            "speed": 44,
+            "durability": 43,
+            "hax": 44,
+            "battleIQ": 44
+          }
+        },
+        {
+          "id": "naruto-090",
+          "name": "Sakon / Ukon",
+          "displayName": "Sakon / Ukon",
+          "franchise": "naruto",
+          "tierLabel": "Low Jonin",
+          "tierRank": 15,
+          "ordinal": 91,
+          "stats": {
+            "power": 45,
+            "speed": 48,
+            "durability": 50,
+            "hax": 46,
+            "battleIQ": 53
+          }
+        },
+        {
+          "id": "naruto-091",
+          "name": "Tayuya",
+          "displayName": "Tayuya",
+          "franchise": "naruto",
+          "tierLabel": "Low Jonin",
+          "tierRank": 15,
+          "ordinal": 92,
+          "stats": {
+            "power": 44,
+            "speed": 39,
+            "durability": 40,
+            "hax": 41,
+            "battleIQ": 35
+          }
+        },
+        {
+          "id": "naruto-092",
+          "name": "Kidomaru",
+          "displayName": "Kidomaru",
+          "franchise": "naruto",
+          "tierLabel": "Low Jonin",
+          "tierRank": 15,
+          "ordinal": 93,
+          "stats": {
+            "power": 44,
+            "speed": 48,
+            "durability": 36,
+            "hax": 51,
+            "battleIQ": 46
+          }
+        },
+        {
+          "id": "naruto-093",
+          "name": "Jirobo",
+          "displayName": "Jirobo",
+          "franchise": "naruto",
+          "tierLabel": "Low Jonin",
+          "tierRank": 15,
+          "ordinal": 94,
+          "stats": {
+            "power": 43,
+            "speed": 45,
+            "durability": 37,
+            "hax": 45,
+            "battleIQ": 42
+          }
+        },
+        {
+          "id": "naruto-094",
+          "name": "Mizuki",
+          "displayName": "Mizuki",
+          "franchise": "naruto",
+          "tierLabel": "Chunin",
+          "tierRank": 17,
+          "ordinal": 95,
+          "stats": {
+            "power": 42,
+            "speed": 48,
+            "durability": 45,
+            "hax": 37,
+            "battleIQ": 33
+          }
+        },
+        {
+          "id": "naruto-095",
+          "name": "Iruka",
+          "displayName": "Iruka",
+          "franchise": "naruto",
+          "tierLabel": "Chunin",
+          "tierRank": 17,
+          "ordinal": 96,
+          "stats": {
+            "power": 42,
+            "speed": 51,
+            "durability": 45,
+            "hax": 49,
+            "battleIQ": 44
+          }
+        },
+        {
+          "id": "naruto-096",
+          "name": "Dosu",
+          "displayName": "Dosu",
+          "franchise": "naruto",
+          "tierLabel": "Low Chunin",
+          "tierRank": 18,
+          "ordinal": 97,
+          "stats": {
+            "power": 41,
+            "speed": 46,
+            "durability": 36,
+            "hax": 47,
+            "battleIQ": 36
+          }
+        },
+        {
+          "id": "naruto-097",
+          "name": "Gozu / Meizu",
+          "displayName": "Gozu / Meizu",
+          "franchise": "naruto",
+          "tierLabel": "Low Chunin",
+          "tierRank": 18,
+          "ordinal": 98,
+          "stats": {
+            "power": 41,
+            "speed": 35,
+            "durability": 36,
+            "hax": 42,
+            "battleIQ": 36
+          }
+        },
+        {
+          "id": "naruto-098",
+          "name": "Kin",
+          "displayName": "Kin",
+          "franchise": "naruto",
+          "tierLabel": "Genin",
+          "tierRank": 19,
+          "ordinal": 99,
+          "stats": {
+            "power": 40,
+            "speed": 36,
+            "durability": 36,
+            "hax": 45,
+            "battleIQ": 39
+          }
+        }
+      ]
+    },
+    {
+      "id": "onepiece",
+      "label": "One Piece",
+      "count": 67,
+      "characters": [
+        {
+          "id": "onepiece-000",
+          "name": "Imu",
+          "displayName": "Imu",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 1,
+          "stats": {
+            "power": 99,
+            "speed": 92,
+            "durability": 93,
+            "hax": 97,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "onepiece-001",
+          "name": "JoyBoy",
+          "displayName": "JoyBoy",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 2,
+          "stats": {
+            "power": 98,
+            "speed": 99,
+            "durability": 100,
+            "hax": 95,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "onepiece-002",
+          "name": "Davy Jones",
+          "displayName": "Davy Jones",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 3,
+          "stats": {
+            "power": 97,
+            "speed": 90,
+            "durability": 91,
+            "hax": 90,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "onepiece-003",
+          "name": "Elbaf Warrior God",
+          "displayName": "Elbaf Warrior God",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 4,
+          "stats": {
+            "power": 96,
+            "speed": 94,
+            "durability": 94,
+            "hax": 93,
+            "battleIQ": 100
+          }
+        },
+        {
+          "id": "onepiece-004",
+          "name": "Rain God Zaza",
+          "displayName": "Rain God Zaza (Dream Demon)",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 5,
+          "stats": {
+            "power": 95,
+            "speed": 96,
+            "durability": 100,
+            "hax": 92,
+            "battleIQ": 87
+          }
+        },
+        {
+          "id": "onepiece-005",
+          "name": "Nika",
+          "displayName": "Nika",
+          "franchise": "onepiece",
+          "tierLabel": "God",
+          "tierRank": 1,
+          "ordinal": 6,
+          "stats": {
+            "power": 95,
+            "speed": 94,
+            "durability": 92,
+            "hax": 88,
+            "battleIQ": 93
+          }
+        },
+        {
+          "id": "onepiece-006",
+          "name": "Shirahoshi",
+          "displayName": "Shirahoshi",
+          "franchise": "onepiece",
+          "tierLabel": "Demigod",
+          "tierRank": 2,
+          "ordinal": 7,
+          "stats": {
+            "power": 94,
+            "speed": 100,
+            "durability": 100,
+            "hax": 100,
+            "battleIQ": 86
+          }
+        },
+        {
+          "id": "onepiece-007",
+          "name": "Harald",
+          "displayName": "Harald (Depths Contract)",
+          "franchise": "onepiece",
+          "tierLabel": "Demigod",
+          "tierRank": 2,
+          "ordinal": 8,
+          "stats": {
+            "power": 93,
+            "speed": 95,
+            "durability": 86,
+            "hax": 93,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "onepiece-008",
+          "name": "Rocks D. Xebec",
+          "displayName": "Rocks D. Xebec (Demi Reverse)",
+          "franchise": "onepiece",
+          "tierLabel": "Demigod",
+          "tierRank": 2,
+          "ordinal": 9,
+          "stats": {
+            "power": 92,
+            "speed": 97,
+            "durability": 91,
+            "hax": 85,
+            "battleIQ": 87
+          }
+        },
+        {
+          "id": "onepiece-009",
+          "name": "Ragnir",
+          "displayName": "Ragnir",
+          "franchise": "onepiece",
+          "tierLabel": "Demigod",
+          "tierRank": 2,
+          "ordinal": 10,
+          "stats": {
+            "power": 91,
+            "speed": 88,
+            "durability": 83,
+            "hax": 84,
+            "battleIQ": 85
+          }
+        },
+        {
+          "id": "onepiece-010",
+          "name": "Gol D. Roger",
+          "displayName": "Gol D. Roger",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 11,
+          "stats": {
+            "power": 90,
+            "speed": 91,
+            "durability": 87,
+            "hax": 88,
+            "battleIQ": 82
+          }
+        },
+        {
+          "id": "onepiece-011",
+          "name": "Garp",
+          "displayName": "Garp (Prime)",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 12,
+          "stats": {
+            "power": 89,
+            "speed": 86,
+            "durability": 94,
+            "hax": 85,
+            "battleIQ": 92
+          }
+        },
+        {
+          "id": "onepiece-012",
+          "name": "Whitebeard",
+          "displayName": "Whitebeard (Prime)",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 13,
+          "stats": {
+            "power": 88,
+            "speed": 86,
+            "durability": 94,
+            "hax": 81,
+            "battleIQ": 80
+          }
+        },
+        {
+          "id": "onepiece-013",
+          "name": "Sengoku",
+          "displayName": "Sengoku (Prime)",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 14,
+          "stats": {
+            "power": 87,
+            "speed": 83,
+            "durability": 79,
+            "hax": 89,
+            "battleIQ": 80
+          }
+        },
+        {
+          "id": "onepiece-014",
+          "name": "Shanks",
+          "displayName": "Shanks",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 15,
+          "stats": {
+            "power": 86,
+            "speed": 80,
+            "durability": 80,
+            "hax": 89,
+            "battleIQ": 92
+          }
+        },
+        {
+          "id": "onepiece-015",
+          "name": "Dragon",
+          "displayName": "Dragon",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 16,
+          "stats": {
+            "power": 86,
+            "speed": 81,
+            "durability": 79,
+            "hax": 92,
+            "battleIQ": 84
+          }
+        },
+        {
+          "id": "onepiece-016",
+          "name": "Mihawk",
+          "displayName": "Mihawk",
+          "franchise": "onepiece",
+          "tierLabel": "Pirate King",
+          "tierRank": 3,
+          "ordinal": 17,
+          "stats": {
+            "power": 85,
+            "speed": 82,
+            "durability": 93,
+            "hax": 80,
+            "battleIQ": 92
+          }
+        },
+        {
+          "id": "onepiece-017",
+          "name": "Loki",
+          "displayName": "Loki",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 18,
+          "stats": {
+            "power": 84,
+            "speed": 82,
+            "durability": 90,
+            "hax": 86,
+            "battleIQ": 90
+          }
+        },
+        {
+          "id": "onepiece-018",
+          "name": "Luffy",
+          "displayName": "Luffy (Gear 5)",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 19,
+          "stats": {
+            "power": 83,
+            "speed": 76,
+            "durability": 90,
+            "hax": 78,
+            "battleIQ": 88
+          }
+        },
+        {
+          "id": "onepiece-019",
+          "name": "Sakazuki",
+          "displayName": "Sakazuki (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 20,
+          "stats": {
+            "power": 82,
+            "speed": 85,
+            "durability": 87,
+            "hax": 79,
+            "battleIQ": 77
+          }
+        },
+        {
+          "id": "onepiece-020",
+          "name": "Kuzan",
+          "displayName": "Kuzan (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 21,
+          "stats": {
+            "power": 81,
+            "speed": 72,
+            "durability": 75,
+            "hax": 80,
+            "battleIQ": 74
+          }
+        },
+        {
+          "id": "onepiece-021",
+          "name": "Topman Warcury",
+          "displayName": "Topman Warcury",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 22,
+          "stats": {
+            "power": 80,
+            "speed": 77,
+            "durability": 81,
+            "hax": 88,
+            "battleIQ": 73
+          }
+        },
+        {
+          "id": "onepiece-022",
+          "name": "Ethanbaron V. Nusjuro",
+          "displayName": "Ethanbaron V. Nusjuro",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 23,
+          "stats": {
+            "power": 79,
+            "speed": 74,
+            "durability": 83,
+            "hax": 79,
+            "battleIQ": 78
+          }
+        },
+        {
+          "id": "onepiece-023",
+          "name": "Figarland Garling",
+          "displayName": "Figarland Garling",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 24,
+          "stats": {
+            "power": 78,
+            "speed": 84,
+            "durability": 77,
+            "hax": 84,
+            "battleIQ": 83
+          }
+        },
+        {
+          "id": "onepiece-024",
+          "name": "Figarland Shamrock",
+          "displayName": "Figarland Shamrock",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 25,
+          "stats": {
+            "power": 78,
+            "speed": 74,
+            "durability": 80,
+            "hax": 83,
+            "battleIQ": 80
+          }
+        },
+        {
+          "id": "onepiece-025",
+          "name": "Kaido",
+          "displayName": "Kaido (Hybrid)",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 26,
+          "stats": {
+            "power": 77,
+            "speed": 77,
+            "durability": 78,
+            "hax": 77,
+            "battleIQ": 81
+          }
+        },
+        {
+          "id": "onepiece-026",
+          "name": "Big Mom",
+          "displayName": "Big Mom (Lifespan Amp)",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 27,
+          "stats": {
+            "power": 76,
+            "speed": 85,
+            "durability": 80,
+            "hax": 73,
+            "battleIQ": 85
+          }
+        },
+        {
+          "id": "onepiece-027",
+          "name": "Shiki",
+          "displayName": "Shiki",
+          "franchise": "onepiece",
+          "tierLabel": "Yonko",
+          "tierRank": 4,
+          "ordinal": 28,
+          "stats": {
+            "power": 75,
+            "speed": 81,
+            "durability": 80,
+            "hax": 68,
+            "battleIQ": 73
+          }
+        },
+        {
+          "id": "onepiece-028",
+          "name": "Blackbeard",
+          "displayName": "Blackbeard (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 29,
+          "stats": {
+            "power": 74,
+            "speed": 80,
+            "durability": 66,
+            "hax": 74,
+            "battleIQ": 82
+          }
+        },
+        {
+          "id": "onepiece-029",
+          "name": "Borsalino",
+          "displayName": "Borsalino (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 30,
+          "stats": {
+            "power": 73,
+            "speed": 76,
+            "durability": 74,
+            "hax": 77,
+            "battleIQ": 66
+          }
+        },
+        {
+          "id": "onepiece-030",
+          "name": "Marcus Mars",
+          "displayName": "Marcus Mars",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 31,
+          "stats": {
+            "power": 72,
+            "speed": 65,
+            "durability": 68,
+            "hax": 65,
+            "battleIQ": 77
+          }
+        },
+        {
+          "id": "onepiece-031",
+          "name": "Silvers Rayleigh",
+          "displayName": "Silvers Rayleigh (Prime)",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 32,
+          "stats": {
+            "power": 71,
+            "speed": 71,
+            "durability": 76,
+            "hax": 78,
+            "battleIQ": 69
+          }
+        },
+        {
+          "id": "onepiece-032",
+          "name": "Scopper Gaban",
+          "displayName": "Scopper Gaban",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 33,
+          "stats": {
+            "power": 70,
+            "speed": 65,
+            "durability": 76,
+            "hax": 70,
+            "battleIQ": 79
+          }
+        },
+        {
+          "id": "onepiece-033",
+          "name": "Oden",
+          "displayName": "Oden (Versus Kaido)",
+          "franchise": "onepiece",
+          "tierLabel": "Admiral",
+          "tierRank": 5,
+          "ordinal": 34,
+          "stats": {
+            "power": 69,
+            "speed": 76,
+            "durability": 71,
+            "hax": 76,
+            "battleIQ": 69
+          }
+        },
+        {
+          "id": "onepiece-034",
+          "name": "Issho",
+          "displayName": "Issho",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 35,
+          "stats": {
+            "power": 69,
+            "speed": 71,
+            "durability": 71,
+            "hax": 60,
+            "battleIQ": 62
+          }
+        },
+        {
+          "id": "onepiece-035",
+          "name": "Aramaki",
+          "displayName": "Aramaki",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 36,
+          "stats": {
+            "power": 68,
+            "speed": 63,
+            "durability": 71,
+            "hax": 70,
+            "battleIQ": 61
+          }
+        },
+        {
+          "id": "onepiece-036",
+          "name": "Shepherd Ju Peter",
+          "displayName": "Shepherd Ju Peter",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 37,
+          "stats": {
+            "power": 67,
+            "speed": 64,
+            "durability": 65,
+            "hax": 68,
+            "battleIQ": 61
+          }
+        },
+        {
+          "id": "onepiece-037",
+          "name": "Jaygarcia Saturn",
+          "displayName": "Jaygarcia Saturn",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 38,
+          "stats": {
+            "power": 66,
+            "speed": 73,
+            "durability": 67,
+            "hax": 62,
+            "battleIQ": 65
+          }
+        },
+        {
+          "id": "onepiece-038",
+          "name": "Law",
+          "displayName": "Law (Awakening)",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 39,
+          "stats": {
+            "power": 65,
+            "speed": 67,
+            "durability": 69,
+            "hax": 67,
+            "battleIQ": 74
+          }
+        },
+        {
+          "id": "onepiece-039",
+          "name": "Eustass Kid",
+          "displayName": "Eustass Kid (Awakening)",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 40,
+          "stats": {
+            "power": 64,
+            "speed": 68,
+            "durability": 67,
+            "hax": 71,
+            "battleIQ": 69
+          }
+        },
+        {
+          "id": "onepiece-040",
+          "name": "Sabo",
+          "displayName": "Sabo (Flame Emperor)",
+          "franchise": "onepiece",
+          "tierLabel": "Low Admiral",
+          "tierRank": 6,
+          "ordinal": 41,
+          "stats": {
+            "power": 63,
+            "speed": 67,
+            "durability": 66,
+            "hax": 62,
+            "battleIQ": 70
+          }
+        },
+        {
+          "id": "onepiece-041",
+          "name": "Yamato",
+          "displayName": "Yamato (Base)",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 42,
+          "stats": {
+            "power": 62,
+            "speed": 70,
+            "durability": 64,
+            "hax": 62,
+            "battleIQ": 65
+          }
+        },
+        {
+          "id": "onepiece-042",
+          "name": "St. Sommers",
+          "displayName": "St. Sommers (Omen)",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 43,
+          "stats": {
+            "power": 61,
+            "speed": 54,
+            "durability": 68,
+            "hax": 56,
+            "battleIQ": 55
+          }
+        },
+        {
+          "id": "onepiece-043",
+          "name": "St. Killingham",
+          "displayName": "St. Killingham (Omen)",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 44,
+          "stats": {
+            "power": 61,
+            "speed": 59,
+            "durability": 60,
+            "hax": 60,
+            "battleIQ": 66
+          }
+        },
+        {
+          "id": "onepiece-044",
+          "name": "Marco",
+          "displayName": "Marco",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 45,
+          "stats": {
+            "power": 60,
+            "speed": 60,
+            "durability": 67,
+            "hax": 63,
+            "battleIQ": 60
+          }
+        },
+        {
+          "id": "onepiece-045",
+          "name": "Boa Hancock",
+          "displayName": "Boa Hancock",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 46,
+          "stats": {
+            "power": 59,
+            "speed": 60,
+            "durability": 55,
+            "hax": 55,
+            "battleIQ": 58
+          }
+        },
+        {
+          "id": "onepiece-046",
+          "name": "Crocodile",
+          "displayName": "Crocodile (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Commander +",
+          "tierRank": 7,
+          "ordinal": 47,
+          "stats": {
+            "power": 58,
+            "speed": 51,
+            "durability": 56,
+            "hax": 66,
+            "battleIQ": 57
+          }
+        },
+        {
+          "id": "onepiece-047",
+          "name": "Zoro",
+          "displayName": "Zoro (King of Hell)",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 48,
+          "stats": {
+            "power": 57,
+            "speed": 59,
+            "durability": 48,
+            "hax": 49,
+            "battleIQ": 51
+          }
+        },
+        {
+          "id": "onepiece-048",
+          "name": "Sanji",
+          "displayName": "Sanji (Germa Enhancements)",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 49,
+          "stats": {
+            "power": 56,
+            "speed": 52,
+            "durability": 53,
+            "hax": 63,
+            "battleIQ": 50
+          }
+        },
+        {
+          "id": "onepiece-049",
+          "name": "Lucci",
+          "displayName": "Lucci (Awakening)",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 50,
+          "stats": {
+            "power": 55,
+            "speed": 51,
+            "durability": 56,
+            "hax": 51,
+            "battleIQ": 60
+          }
+        },
+        {
+          "id": "onepiece-050",
+          "name": "Gunko",
+          "displayName": "Gunko",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 51,
+          "stats": {
+            "power": 54,
+            "speed": 56,
+            "durability": 60,
+            "hax": 58,
+            "battleIQ": 51
+          }
+        },
+        {
+          "id": "onepiece-051",
+          "name": "King",
+          "displayName": "King",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 52,
+          "stats": {
+            "power": 53,
+            "speed": 61,
+            "durability": 45,
+            "hax": 57,
+            "battleIQ": 62
+          }
+        },
+        {
+          "id": "onepiece-052",
+          "name": "Katakuri",
+          "displayName": "Katakuri (Awakening)",
+          "franchise": "onepiece",
+          "tierLabel": "First Commander",
+          "tierRank": 8,
+          "ordinal": 53,
+          "stats": {
+            "power": 53,
+            "speed": 55,
+            "durability": 54,
+            "hax": 61,
+            "battleIQ": 51
+          }
+        },
+        {
+          "id": "onepiece-053",
+          "name": "Queen",
+          "displayName": "Queen",
+          "franchise": "onepiece",
+          "tierLabel": "Second Commander",
+          "tierRank": 9,
+          "ordinal": 54,
+          "stats": {
+            "power": 52,
+            "speed": 56,
+            "durability": 57,
+            "hax": 47,
+            "battleIQ": 43
+          }
+        },
+        {
+          "id": "onepiece-054",
+          "name": "Oven",
+          "displayName": "Oven",
+          "franchise": "onepiece",
+          "tierLabel": "Second Commander",
+          "tierRank": 9,
+          "ordinal": 55,
+          "stats": {
+            "power": 51,
+            "speed": 42,
+            "durability": 54,
+            "hax": 48,
+            "battleIQ": 43
+          }
+        },
+        {
+          "id": "onepiece-055",
+          "name": "Franky",
+          "displayName": "Franky (Vega Coia)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 56,
+          "stats": {
+            "power": 50,
+            "speed": 54,
+            "durability": 46,
+            "hax": 44,
+            "battleIQ": 46
+          }
+        },
+        {
+          "id": "onepiece-056",
+          "name": "Jinbe",
+          "displayName": "Jinbe (Egghead-Elbaf)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 57,
+          "stats": {
+            "power": 49,
+            "speed": 57,
+            "durability": 43,
+            "hax": 42,
+            "battleIQ": 54
+          }
+        },
+        {
+          "id": "onepiece-057",
+          "name": "Kin'emon",
+          "displayName": "Kin'emon",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 58,
+          "stats": {
+            "power": 48,
+            "speed": 56,
+            "durability": 43,
+            "hax": 54,
+            "battleIQ": 54
+          }
+        },
+        {
+          "id": "onepiece-058",
+          "name": "Denjiro",
+          "displayName": "Denjiro",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 59,
+          "stats": {
+            "power": 47,
+            "speed": 54,
+            "durability": 49,
+            "hax": 53,
+            "battleIQ": 45
+          }
+        },
+        {
+          "id": "onepiece-059",
+          "name": "Inuarashi",
+          "displayName": "Inuarashi (Sulong)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 60,
+          "stats": {
+            "power": 46,
+            "speed": 47,
+            "durability": 54,
+            "hax": 51,
+            "battleIQ": 54
+          }
+        },
+        {
+          "id": "onepiece-060",
+          "name": "Nekomamushi",
+          "displayName": "Nekomamushi (Sulong)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 61,
+          "stats": {
+            "power": 45,
+            "speed": 47,
+            "durability": 38,
+            "hax": 38,
+            "battleIQ": 52
+          }
+        },
+        {
+          "id": "onepiece-061",
+          "name": "Koby",
+          "displayName": "Koby (Honesty Impact)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 62,
+          "stats": {
+            "power": 44,
+            "speed": 37,
+            "durability": 48,
+            "hax": 49,
+            "battleIQ": 48
+          }
+        },
+        {
+          "id": "onepiece-062",
+          "name": "Smoker",
+          "displayName": "Smoker (Post-Timeskip)",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 63,
+          "stats": {
+            "power": 44,
+            "speed": 43,
+            "durability": 40,
+            "hax": 43,
+            "battleIQ": 46
+          }
+        },
+        {
+          "id": "onepiece-063",
+          "name": "Jack",
+          "displayName": "Jack",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 64,
+          "stats": {
+            "power": 43,
+            "speed": 37,
+            "durability": 49,
+            "hax": 40,
+            "battleIQ": 50
+          }
+        },
+        {
+          "id": "onepiece-064",
+          "name": "Who's-Who",
+          "displayName": "Who's-Who",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 65,
+          "stats": {
+            "power": 42,
+            "speed": 36,
+            "durability": 34,
+            "hax": 50,
+            "battleIQ": 36
+          }
+        },
+        {
+          "id": "onepiece-065",
+          "name": "Ulti",
+          "displayName": "Ulti",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 66,
+          "stats": {
+            "power": 41,
+            "speed": 37,
+            "durability": 39,
+            "hax": 46,
+            "battleIQ": 49
+          }
+        },
+        {
+          "id": "onepiece-066",
+          "name": "Cracker",
+          "displayName": "Cracker",
+          "franchise": "onepiece",
+          "tierLabel": "Third Commander",
+          "tierRank": 10,
+          "ordinal": 67,
+          "stats": {
+            "power": 40,
+            "speed": 43,
+            "durability": 36,
+            "hax": 38,
+            "battleIQ": 43
+          }
+        }
+      ]
+    }
+  ]
+}
